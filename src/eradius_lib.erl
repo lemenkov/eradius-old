@@ -5,7 +5,7 @@
 %%% Description : Radius encode/decode routines (RFC-2865).
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
 %%%
-%%% $Id: eradius_lib.erl,v 1.3 2004/03/25 15:17:40 seanhinde Exp $
+%%% $Id: eradius_lib.erl,v 1.4 2004/03/25 16:14:47 seanhinde Exp $
 %%%-------------------------------------------------------------------
 -export([enc_pdu/1, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).
@@ -268,8 +268,8 @@ dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
     <<Vval:Len/binary,Vrest/binary>> = Vbin,
     Vkey = {VendId,Vtype},
     case eradius_dict:lookup(Vkey) of
-	A when record(A, attribute) ->
-	    dec_attr_val(Vkey, Vval) ++ dec_vend_attr_val(VendId, Vrest);
+	[A] when record(A, attribute) ->
+	    dec_attr_val(A, Vval) ++ dec_vend_attr_val(VendId, Vrest);
 	_ ->
 	    [{Vkey,Vval} | dec_vend_attr_val(VendId, Vrest)]
     end.
