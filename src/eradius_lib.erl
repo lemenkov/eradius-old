@@ -5,9 +5,9 @@
 %%% Description : Radius encode/decode routines (RFC-2865).
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
 %%%
-%%% $Id: eradius_lib.erl,v 1.4 2004/03/25 16:14:47 seanhinde Exp $
+%%% $Id: eradius_lib.erl,v 1.5 2004/03/26 17:47:19 seanhinde Exp $
 %%%-------------------------------------------------------------------
--export([enc_pdu/1, dec_packet/1, enc_accreq/3]).
+-export([enc_pdu/1, enc_reply_pdu/2, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).
 
 -export([dec_packet/1]).  %% useful when debugging
@@ -70,12 +70,20 @@ zero(N) -> [0 | zero(N-1)].
 %% Encode/Decode Functions
 %%====================================================================
 
-%% Ret: io_list()
+%% Ret: io_list(). Specific format of io_list is relied on by 
+%% enc_reply_pdu/1
 enc_pdu(Pdu) ->
     {Cmd, CmdPdu} = enc_cmd(Pdu#rad_pdu.cmd),
-    [<<Cmd:8, (Pdu#rad_pdu.reqid):8, (io_list_len(CmdPdu) + 20):16, 
-      (Pdu#rad_pdu.authenticator):16/binary>>,
+    [<<Cmd:8, (Pdu#rad_pdu.reqid):8, (io_list_len(CmdPdu) + 20):16>>, 
+     <<(Pdu#rad_pdu.authenticator):16/binary>>,
      CmdPdu].
+
+%% This one includes the authenticator substitution required for 
+%% sending replies from the server.
+enc_reply_pdu(Pdu, Secret) ->
+    [Head, Auth, Cmd] = enc_pdu(Pdu),
+    Reply_auth = erlang:md5([Head, Auth, Cmd, Secret]),
+    [Head, Reply_auth, Cmd].
 
 enc_attrib(Pos, R, Def, AttrName, Type) ->
     V = element(Pos, R),
