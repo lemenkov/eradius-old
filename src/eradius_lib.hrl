@@ -6,7 +6,7 @@
 %%% Description : Definitions for RADIUS
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
 %%%
-%%% $Id: eradius_lib.hrl,v 1.1 2003/10/27 23:39:40 etnt Exp $
+%%% $Id: eradius_lib.hrl,v 1.2 2003/11/10 13:42:29 etnt Exp $
 %%%-------------------------------------------------------------------
 
 -define(BYTE, integer-unit:8).    % Nice syntactic sugar...
@@ -90,9 +90,8 @@
 	  login_time,      % erlang:now/0
 	  logout_time,     % erlang:now/0
 	  session_id,
-	  vend_id = 1872,  % Alteon
-	  vend_attrs = [], % list of {Type, Bin}
-	  std_attrs  = [], % list of {Type, Bin}
+	  vend_attrs = [], % list_of( {VendorId, list_of( {Id, Val} ) } )
+	  std_attrs  = [], % list_of( {Id, Val} )
 	  user,
 	  nas_ip,
 	  servers,         % overrides the #radacct{} content
