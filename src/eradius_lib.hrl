@@ -6,7 +6,7 @@
 %%% Description : Definitions for RADIUS
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
 %%%
-%%% $Id: eradius_lib.hrl,v 1.2 2003/11/10 13:42:29 etnt Exp $
+%%% $Id: eradius_lib.hrl,v 1.3 2004/03/26 17:48:00 seanhinde Exp $
 %%%-------------------------------------------------------------------
 
 -define(BYTE, integer-unit:8).    % Nice syntactic sugar...
@@ -49,6 +49,14 @@
 -define(RTCAdmin_Reboot,           7).
 -define(RTCNAS_Reboot,            11).
 
+%% In a server we need to store properties of a NAS. This is used as
+%% an mnesia record as well as in call processing.
+-record(nas_prop, {
+          ip,
+          secret,
+          mf,
+          trace = false
+         }).
 
 %%- Radius accounting server info.
 -record( radacct , {
