@@ -5,7 +5,7 @@
 %%% Description : Radius encode/decode routines (RFC-2865).
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
 %%%
-%%% $Id: eradius_lib.erl,v 1.2 2003/11/10 13:42:29 etnt Exp $
+%%% $Id: eradius_lib.erl,v 1.3 2004/03/25 15:17:40 seanhinde Exp $
 %%%-------------------------------------------------------------------
 -export([enc_pdu/1, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).
@@ -240,8 +240,14 @@ dec_attributes(A0, Acc) ->
 
 dec_attr_val(A, Bin) when A#attribute.type == string -> 
     [{A, binary_to_list(Bin)}];
-dec_attr_val(A, <<I/integer>>) when A#attribute.type == integer -> 
-    [{A, I}];
+dec_attr_val(A, I0) when A#attribute.type == integer -> 
+    L = size(I0)*8,
+    case I0 of
+        <<I:L/integer>> ->
+            [{A, I}];
+        _ ->
+            [{A, I0}]
+    end;
 dec_attr_val(A, <<B,C,D,E>>) when A#attribute.type == ipaddr -> 
     [{A, {B,C,D,E}}];
 dec_attr_val(A, Bin) when A#attribute.type == octets -> 
@@ -254,7 +260,7 @@ dec_attr_val(A, Bin) when A#attribute.type == octets ->
     end;
 dec_attr_val(A, Val) -> 
     io:format("Uups...A=~p~n",[A]),
-    {A, Val}.
+    [{A, Val}].
 
 dec_vend_attr_val(_VendId, <<>>) -> [];
 dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
