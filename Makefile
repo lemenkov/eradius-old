@@ -1,11 +1,18 @@
-ERL		= erl
-ERLC	= erlc
+.PHONY: dict priv src test
 
-all:
-	${MAKE} ERLC=${ERLC} -C src ../ebin/eradius_dict.beam
-	${MAKE} ERLC=${ERLC} -C priv
-	${MAKE} ERLC=${ERLC} -C src
-	${MAKE} ERLC=${ERLC} -C test ../ebin/et.beam
+all: dict priv src test
+
+dict:
+	${MAKE} -C src ../ebin/eradius_dict.beam
+
+priv:
+	${MAKE} -C priv
+
+src:
+	${MAKE} -C src
+
+test:
+	${MAKE} -C test ../ebin/et.beam
 
 clean:
 	${MAKE} -C priv $@
