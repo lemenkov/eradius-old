@@ -10,8 +10,6 @@
 -export([enc_pdu/1, enc_reply_pdu/2, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).
 
--export([dec_packet/1]).  %% useful when debugging
-
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
 -include("dictionary.hrl").
@@ -70,15 +68,15 @@ zero(N) -> [0 | zero(N-1)].
 %% Encode/Decode Functions
 %%====================================================================
 
-%% Ret: io_list(). Specific format of io_list is relied on by 
+%% Ret: io_list(). Specific format of io_list is relied on by
 %% enc_reply_pdu/1
 enc_pdu(Pdu) ->
     {Cmd, CmdPdu} = enc_cmd(Pdu#rad_pdu.cmd),
-    [<<Cmd:8, (Pdu#rad_pdu.reqid):8, (io_list_len(CmdPdu) + 20):16>>, 
+    [<<Cmd:8, (Pdu#rad_pdu.reqid):8, (io_list_len(CmdPdu) + 20):16>>,
      <<(Pdu#rad_pdu.authenticator):16/binary>>,
      CmdPdu].
 
-%% This one includes the authenticator substitution required for 
+%% This one includes the authenticator substitution required for
 %% sending replies from the server.
 enc_reply_pdu(Pdu, Secret) ->
     [Head, Auth, Cmd] = enc_pdu(Pdu),
@@ -89,13 +87,13 @@ enc_attrib(Pos, R, Def, AttrName, Type) ->
     V = element(Pos, R),
     if  V == element(Pos, Def) ->
 	    [];
-	true -> 
+	true ->
 	    enc_attrib(AttrName, V, Type)
     end.
 
 enc_attrib(AttrName, V, Type) ->
     Val = type_conv(V, Type),
-    Id = strip_vendor(AttrName), 
+    Id = strip_vendor(AttrName),
     <<Id, (size(Val) + 2):8, Val/binary>>.
 
 strip_vendor({_Vendor, Id}) -> Id;
@@ -109,7 +107,7 @@ type_conv(V, octets)         -> list_to_binary(V);
 type_conv(V, date)           -> list_to_binary(V).  %% FIXME !!
 
 
-enc_cmd(R) when record(R, rad_request) ->
+enc_cmd(R) when is_record(R, rad_request) ->
     Def = #rad_request{},
     {?RAccess_Request,
      [enc_attrib(#rad_request.user,      R, Def, ?RUser_Name,       binary),
@@ -117,7 +115,7 @@ enc_cmd(R) when record(R, rad_request) ->
       enc_attrib(#rad_request.nas_ip,    R, Def, ?RNAS_Ip_Address,  ipaddr),
       enc_attrib(#rad_request.state,     R, Def, ?RState,           binary)
      ]};
-enc_cmd(R) when record(R, rad_accept) ->
+enc_cmd(R) when is_record(R, rad_accept) ->
     Def = #rad_accept{},
     {?RAccess_Accept,
      [enc_attrib(#rad_accept.user,        R, Def, ?RUser_Name,       binary),
@@ -126,19 +124,19 @@ enc_cmd(R) when record(R, rad_accept) ->
 		end,
 		R#rad_accept.vendor_specifics)]
     };
-enc_cmd(R) when record(R, rad_challenge) ->
+enc_cmd(R) when is_record(R, rad_challenge) ->
     Def = #rad_challenge{},
     {?RAccess_Challenge,
      [enc_attrib(#rad_challenge.state,   R, Def, ?RState,           binary),
       lists:map(fun(RM) -> <<?RReply_Msg:8, (size(RM)+2):8, RM/binary>> end,
 		R#rad_challenge.reply_msgs)]
     };
-enc_cmd(R) when record(R, rad_reject) ->
+enc_cmd(R) when is_record(R, rad_reject) ->
     {?RAccess_Reject,
      lists:map(fun(RM) -> <<?RReply_Msg:8, (size(RM)+2):8, RM/binary>> end,
 	       R#rad_reject.reply_msgs)
     };
-enc_cmd(R) when record(R, rad_accreq) ->
+enc_cmd(R) when is_record(R, rad_accreq) ->
     Def = #rad_accreq{},
     {?RAccounting_Request,
      [enc_attrib(#rad_accreq.status_type, R, Def, ?RStatus_Type,     integer),
@@ -149,7 +147,7 @@ enc_cmd(R) when record(R, rad_accreq) ->
       enc_attrib(#rad_accreq.nas_ip,      R, Def, ?RNAS_Ip_Address,  ipaddr),
       enc_std_attrs(R),
       enc_vendor_attrs(R)
-     ]}. 
+     ]}.
 
 enc_std_attrs(R) ->
     enc_attributes(R#rad_accreq.std_attrs).
@@ -166,7 +164,7 @@ enc_vendor_attrs(R) ->
 enc_attributes(As) ->
     F = fun({Id, Val}, Acc) ->
 		case eradius_dict:lookup(Id) of
-		    [A] when record(A, attribute) ->
+		    [A] when is_record(A, attribute) ->
 			[enc_attrib(Id, Val, A#attribute.type) | Acc];
 		    _ ->
 			Acc
@@ -179,10 +177,10 @@ io_list_len(L) -> io_list_len(L, 0).
 io_list_len([H|T], N) ->
     if
 	H >= 0, H =< 255 -> io_list_len(T, N+1);
-	list(H) -> io_list_len(T, io_list_len(H,N));
-	binary(H) -> io_list_len(T, size(H) + N)
+	is_list(H) -> io_list_len(T, io_list_len(H,N));
+	is_binary(H) -> io_list_len(T, size(H) + N)
     end;
-io_list_len(H, N) when binary(H) ->
+io_list_len(H, N) when is_binary(H) ->
     size(H) + N;
 io_list_len([], N) ->
     N.
@@ -201,11 +199,11 @@ dec_packet0(Packet) ->
     <<Cmd:8, ReqId:8, Len:16, Auth:16/binary, Attribs0/binary>> = Packet,
     Size = size(Attribs0),
     Attr_len = Len - 20,
-    Attribs = 
-	if 
-	    Attr_len > Size -> 
+    Attribs =
+	if
+	    Attr_len > Size ->
 		throw(bad_pdu);
-	    Attr_len == Size -> 
+	    Attr_len == Size ->
 		Attribs0;
 	    true ->
 		<<Attribs1:Attr_len/binary, _/binary>> = Attribs0,
@@ -232,23 +230,23 @@ dec_packet0(Packet) ->
 	__Len1 = __Len0 - 2,
 	<<Val:__Len1/binary, A1/binary>> = __R).
 
- 
-dec_attributes(As) -> 
+
+dec_attributes(As) ->
     dec_attributes(As, []).
 
 dec_attributes(<<>>, Acc) -> Acc;
 dec_attributes(A0, Acc) ->
     ?dec_attrib(A0, Type, Val, A1),
     case eradius_dict:lookup(Type) of
-	[A] when record(A, attribute) ->
+	[A] when is_record(A, attribute) ->
 	    dec_attributes(A1, dec_attr_val(A,Val) ++ Acc);
 	_ ->
 	    dec_attributes(A1, [{Type, Val} | Acc])
     end.
 
-dec_attr_val(A, Bin) when A#attribute.type == string -> 
+dec_attr_val(A, Bin) when A#attribute.type == string ->
     [{A, binary_to_list(Bin)}];
-dec_attr_val(A, I0) when A#attribute.type == integer -> 
+dec_attr_val(A, I0) when A#attribute.type == integer ->
     L = size(I0)*8,
     case I0 of
         <<I:L/integer>> ->
@@ -256,9 +254,9 @@ dec_attr_val(A, I0) when A#attribute.type == integer ->
         _ ->
             [{A, I0}]
     end;
-dec_attr_val(A, <<B,C,D,E>>) when A#attribute.type == ipaddr -> 
+dec_attr_val(A, <<B,C,D,E>>) when A#attribute.type == ipaddr ->
     [{A, {B,C,D,E}}];
-dec_attr_val(A, Bin) when A#attribute.type == octets -> 
+dec_attr_val(A, Bin) when A#attribute.type == octets ->
     case A#attribute.id of
 	?Vendor_Specific ->
 	    <<VendId:32/integer, VendVal/binary>> = Bin,
@@ -266,7 +264,7 @@ dec_attr_val(A, Bin) when A#attribute.type == octets ->
 	_ ->
 	    [{A, Bin}]
     end;
-dec_attr_val(A, Val) -> 
+dec_attr_val(A, Val) ->
     io:format("Uups...A=~p~n",[A]),
     [{A, Val}].
 
@@ -276,12 +274,12 @@ dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
     <<Vval:Len/binary,Vrest/binary>> = Vbin,
     Vkey = {VendId,Vtype},
     case eradius_dict:lookup(Vkey) of
-	[A] when record(A, attribute) ->
+	[A] when is_record(A, attribute) ->
 	    dec_attr_val(A, Vval) ++ dec_vend_attr_val(VendId, Vrest);
 	_ ->
 	    [{Vkey,Vval} | dec_vend_attr_val(VendId, Vrest)]
     end.
-    
+
 
 %%% ====================================================================
 %%% Radius Accounting specifics
@@ -310,5 +308,5 @@ zero16() ->
 zero_bytes(N) ->
     <<0:N/?BYTE>>.
 
-l2b(L) when list(L)   -> list_to_binary(L);
-l2b(B) when binary(B) -> B.
+l2b(L) when is_list(L)   -> list_to_binary(L);
+l2b(B) when is_binary(B) -> B.

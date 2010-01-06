@@ -8,15 +8,28 @@
 -behaviour(gen_server).
 
 %% External exports
--export([start/0,start_link/0, lookup/1]).
--export([load_tables/1, mk_dict/1, parse_dict/1, make/1]).
+-export([
+         start/0,start_link/0,
+         lookup/1
+        ]).
+-export([
+         load_tables/1,
+         mk_dict/1,
+         parse_dict/1,
+         make/1
+        ]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
-
+-export([
+         init/1,
+         handle_call/3,
+         handle_cast/2,
+         handle_info/2,
+         terminate/2,
+         code_change/3
+        ]).
 
 -include("eradius_dict.hrl").
-
 
 -define(SERVER    , ?MODULE).
 -define(TABLENAME , ?MODULE).
@@ -27,12 +40,12 @@
 %%% API
 %%%----------------------------------------------------------------------
 
-lookup(Id) -> 
+lookup(Id) ->
     ets:lookup(?TABLENAME, Id).
 
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
- 
+
 start() ->
     gen_server:start({local, ?SERVER}, ?MODULE, [], []).
 
@@ -71,7 +84,7 @@ create_table() ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%----------------------------------------------------------------------
-handle_call({load_tables, Tables}, From, State) ->
+handle_call({load_tables, Tables}, _From, State) ->
     Res = (catch lists:foreach(fun(Tab) -> load_table(Tab) end, Tables)),
     {reply, Res, State}.
 
@@ -81,7 +94,7 @@ handle_call({load_tables, Tables}, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%----------------------------------------------------------------------
-handle_cast(Msg, State) ->
+handle_cast(_Msg, State) ->
     {noreply, State}.
 
 %%----------------------------------------------------------------------
@@ -90,7 +103,7 @@ handle_cast(Msg, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%----------------------------------------------------------------------
-handle_info(Info, State) ->
+handle_info(_Info, State) ->
     {noreply, State}.
 
 %%----------------------------------------------------------------------
@@ -98,8 +111,16 @@ handle_info(Info, State) ->
 %% Purpose: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %%----------------------------------------------------------------------
-terminate(Reason, State) ->
+terminate(_Reason, _State) ->
     ok.
+
+%%--------------------------------------------------------------------
+%% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
+%% Description: Convert process state when code is changed
+%%--------------------------------------------------------------------
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
 
 %%%----------------------------------------------------------------------
 %%% Internal functions
@@ -117,10 +138,10 @@ load_table(Table) ->
 	{ok, Res} ->
 	    lists:foreach(fun(R) -> ets:insert(?TABLENAME, R) end, Res),
 	    ok;
-	Error ->
+	_Error ->
 	    {error, load_table}
     end.
-			  
+
 
 
 %%% --------------------------------------------------------------------
@@ -132,7 +153,7 @@ make([File]) ->
     {ok, Dir} = file:get_cwd(),
     mk_dict(Dir ++ "/" ++ atom_to_list(File)),
     init:stop().
-    
+
 
 mk_dict(File) ->
     Res = parse_dict(File),
@@ -144,16 +165,16 @@ mk_outfiles(Res, Dir, File) ->
     emit(Res, Hrl, Map),
     close_files(Hrl, Map).
 
-emit([A|T], Hrl, Map) when record(A, attribute) ->
-    io:format(Hrl, "-define( ~s , ~w ).~n", 
+emit([A|T], Hrl, Map) when is_record(A, attribute) ->
+    io:format(Hrl, "-define( ~s , ~w ).~n",
 	      [A#attribute.name, A#attribute.id]),
-    io:format(Map, "{attribute, ~w, ~w, \"~s\"}.~n", 
+    io:format(Map, "{attribute, ~w, ~w, \"~s\"}.~n",
 	      [A#attribute.id, A#attribute.type, A#attribute.name]),
     emit(T, Hrl, Map);
-emit([V|T], Hrl, Map) when record(V, vendor) ->
-    io:format(Hrl, "-define( ~s , ~w ).~n", 
+emit([V|T], Hrl, Map) when is_record(V, vendor) ->
+    io:format(Hrl, "-define( ~s , ~w ).~n",
 	      [V#vendor.name, V#vendor.type]),
-    io:format(Map, "{vendor, ~w, \"~s\"}.~n", 
+    io:format(Map, "{vendor, ~w, \"~s\"}.~n",
 	      [V#vendor.type, V#vendor.name]),
     emit(T, Hrl, Map);
 emit([_|T], Hrl, Map) ->
@@ -174,7 +195,7 @@ close_files(Hrl, Map) ->
     file:close(Hrl),
     file:close(Map).
 
-parse_dict(File) when list(File) ->
+parse_dict(File) when is_list(File) ->
     {ok,B} = file:read_file(File),
     F = fun(Line,Acc) ->
 		case pd(string:tokens(Line,"\s\t\r")) of
@@ -184,26 +205,26 @@ parse_dict(File) when list(File) ->
 	end,
     lists:foldl(F,[],string:tokens(b2l(B),"\n")).
 
-pd(["VENDOR", Name, Id]) -> 
+pd(["VENDOR", Name, Id]) ->
     put({vendor,Name}, l2i(Id)),
     {ok, #vendor{type = l2i(Id), name = Name}};
-pd(["ATTRIBUTE", Name, Id, Type]) -> 
+pd(["ATTRIBUTE", Name, Id, Type]) ->
     {ok,#attribute{name = d2u(Name), id = id2i(Id), type = l2a(Type)}};
-pd(["ATTRIBUTE", Name, Id, Type, Vendor]) -> 
+pd(["ATTRIBUTE", Name, Id, Type, Vendor]) ->
     case get({vendor,Vendor}) of
-	undefined -> 
+	undefined ->
 	    %% No vendor defined, line must have some other "crap" after Type.
 	    {ok,#attribute{name = d2u(Name), id = id2i(Id), type = l2a(Type)}};
 	VendId ->
 	    {ok,#attribute{name = d2u(Name), id = {VendId,id2i(Id)},type = l2a(Type)}}
     end;
-pd(X) -> 
-    %%io:format("Skipping: ~p~n", [X]),
+pd(_X) ->
+    %%io:format("Skipping: ~p~n", [_X]),
     false.
 
 priv_dir() ->
     dir(?MODULE) ++ "/priv".
-    
+
 dir(Mod) ->
     P = code:which(Mod),
     [_,_|R] = lists:reverse(string:tokens(P,"/")),
@@ -211,7 +232,7 @@ dir(Mod) ->
 
 id2i(Id) ->
     case catch l2i(Id) of
-	I when integer(I) -> I;
+	I when is_integer(I) -> I;
 	{'EXIT', _} ->
 	    hex2i(Id)
     end.
@@ -230,24 +251,24 @@ x2i(X) when X == $D ; X == $d -> 16#d;
 x2i(X) when X == $E ; X == $e -> 16#e;
 x2i(X) when X == $F ; X == $f -> 16#f.
 
-b2l(B) when binary(B) -> binary_to_list(B);
-b2l(L) when list(L)   -> L.
+b2l(B) when is_binary(B) -> binary_to_list(B);
+b2l(L) when is_list(L)   -> L.
 
-l2i(L) when list(L)    -> list_to_integer(L);
-l2i(I) when integer(I) -> I.
+l2i(L) when is_list(L)    -> list_to_integer(L);
+l2i(I) when is_integer(I) -> I.
 
-l2a(L) when list(L) -> list_to_atom(L);
-l2a(A) when atom(A) -> A.
+l2a(L) when is_list(L) -> list_to_atom(L);
+l2a(A) when is_atom(A) -> A.
 
 %%% Replace all dashes with underscore characters.
-d2u(L) when list(L) ->
+d2u(L) when is_list(L) ->
     repl(L, $-, $_).
 
 %%% Replace all dots with underscore characters.
-o2u(L) when list(L) ->
+o2u(L) when is_list(L) ->
     repl(L, $., $_).
 
-repl(L,X,Y) when list(L) ->
+repl(L,X,Y) when is_list(L) ->
     F = fun(Z) when Z == X -> Y;
 	   (C) -> C
 	end,

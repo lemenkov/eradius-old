@@ -2,7 +2,7 @@
 %%% File    : eradius_server_example.erl
 %%% Author  : Sean Hinde <sean@Seans-Mac.local>
 %%% Description : Example implementation module for eradius server
-%%%               Note CHAP is untested as of 26th March 2004, but 
+%%%               Note CHAP is untested as of 26th March 2004, but
 %%%               this is how I thihk it should work !
 %%% Created : 26 Mar 2004 by Sean Hinde <sean@Seans-Mac.local>
 %%%-------------------------------------------------------------------
@@ -78,10 +78,10 @@ get_user("sean") -> {ok, <<"Sean_passzektrw8&">>};
 get_user("tobbe") -> {ok, <<"qwe123">>};
 get_user(_)      -> false.
 
-lookup(Key, [{#attribute{id = Key}, Val}|T]) ->
+lookup(Key, [{#attribute{id = Key}, Val}|_T]) ->
     {ok, Val};
 lookup(Key, [_|T]) ->
     lookup(Key, T);
 lookup(_, []) ->
     false.
-    
+

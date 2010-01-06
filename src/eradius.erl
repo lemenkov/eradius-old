@@ -4,7 +4,7 @@
 %%% Author      : {mbj,tobbe}@bluetail.com>
 %%% Description : RADIUS Authentication
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
-%%% 
+%%%
 %%% $Id: eradius.erl,v 1.2 2003/11/05 21:00:03 etnt Exp $
 %%%-------------------------------------------------------------------
 -behaviour(gen_server).
@@ -21,7 +21,7 @@
 	 load_tables/1]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, 
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
 	 code_change/3]).
 
 %% Internal exports
@@ -33,7 +33,7 @@
 -define(SERVER    , ?MODULE).
 -define(TABLENAME , ?MODULE).
 
--define(WORKER_TIMEOUT, 10000).  % serious error if no answer after 10 sec 
+-define(WORKER_TIMEOUT, 10000).  % serious error if no answer after 10 sec
 
 -define(PORT, 1812).
 
@@ -51,7 +51,7 @@ default_port() -> ?PORT.
 start_link() ->
     eradius_dict:start_link(),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
- 
+
 start() ->
     eradius_dict:start(),
     gen_server:start({local, ?SERVER}, ?MODULE, [], []).
@@ -74,7 +74,7 @@ auth(E) ->
 auth(E, User, Passwd) ->
     auth(E, User, Passwd, E#eradius.state).
 
-auth(E, User, Passwd, CallState) when record(E, eradius) ->
+auth(E, User, Passwd, CallState) when is_record(E, eradius) ->
     gen_server:call(?SERVER, {auth, E, User, Passwd, CallState},
 		   infinity).
 
@@ -93,7 +93,7 @@ load_tables(Tables) ->
 %%              processes which talk SMB authentication. There
 %%              is one worker per SMB-XNET "domain".
 %%
-%% Returns:     {ok, State}         
+%% Returns:     {ok, State}
 %%--------------------------------------------------------------------
 init([]) ->
     process_flag(trap_exit, true),
@@ -106,7 +106,7 @@ create_ets_table() ->
 
 bump_id() ->
     ets:update_counter(?TABLENAME, id_counter, 1).
-    
+
 
 %%--------------------------------------------------------------------
 %% Function: handle_call/3
@@ -172,7 +172,7 @@ start_worker(From, E, User, Passwd, CState) ->
     Args = [From, E, User, Passwd, CState],
     proc_lib:spawn(?MODULE, worker, Args).
 
-get_id() -> 
+get_id() ->
     bump_id().
 
 worker(From, E, User, Passwd, CState) ->
@@ -208,7 +208,7 @@ wloop(E, User0, Passwd0, [[Ip,Port,Secret0]|Srvs], State) ->
     ?TRACEFUN(E,"sending RADIUS request for ~s to ~p",
 	      [binary_to_list(User), {Ip, Port}]),
     Req = eradius_lib:enc_pdu(Pdu),
-    StatKey = [E, Ip, Port],
+    _StatKey = [E, Ip, Port],
     case send_recv_msg(Ip, Port, Req, E) of
 	timeout ->
 	    ?STATFUN_TIMEDOUT(E, Ip, Port),
@@ -248,14 +248,14 @@ send_recv_msg(Ip, Port, Req, E) ->
 
 
 recv_wait(S, Timeout) ->
-    receive 
+    receive
 	{udp, S, _IP, _Port, Packet} ->
 	    eradius_lib:dec_packet(Packet)
     after Timeout ->
 	    timeout
     end.
 
-decode_response(Resp, E) when record(Resp, rad_pdu) ->
+decode_response(Resp, _E) when is_record(Resp, rad_pdu) ->
     Resp#rad_pdu.cmd;
 decode_response(timeout, _AuthSpec) ->
     timeout;
