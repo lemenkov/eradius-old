@@ -1,11 +1,11 @@
-include ../../../support/include.mk
+include ../include.mk
 
 ERLC_FLAGS += -I ../include
 
 all: $(ERL_OBJECTS)
 
 clean:
-	-rm $(ERL_OBJECTS) 
+	-rm -f $(ERL_OBJECTS)
 
-eradius_dict.beam: eradius_dict.erl
+$(EBIN_DIR)/%.$(EMULATOR): %.erl
 	$(ERLC) $(ERLC_FLAGS) -o $(EBIN_DIR) $<

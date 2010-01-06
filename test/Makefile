@@ -1,12 +1,12 @@
-include ../../../support/include.mk
+include ../include.mk
 
 ERLC_FLAGS += -I ../include -I ../src
 
-TEST_OBJECTS=../ebin/et.beam
-
-all: $(TEST_OBJECTS)
+all:
 
 clean:
-	-rm $(TEST_OBJECTS) 
+	-rm -f ${EBIN_DIR}/et.beam
 
 
+$(EBIN_DIR)/%.$(EMULATOR): %.erl
+	$(ERLC) $(ERLC_FLAGS) -o $(EBIN_DIR) $<
