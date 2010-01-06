@@ -43,8 +43,8 @@ DICTMAPS=dictionary.map \
 
 all: $(DICTMAPS)
 
-clean:  
-	-rm *.map ../include/dictionary*.hrl
+clean:
+	-rm -f *.map ../include/dictionary*.hrl
 
 dictionary.map: dictionaries/dictionary
 	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
