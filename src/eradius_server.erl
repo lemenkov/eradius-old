@@ -1,8 +1,8 @@
 %%%----------------------------------------------------------------------
 %%% File    : radius_server.erl
 %%% Author  : ottuser local account <otpuser@tiger>
-%%% Purpose : Generic Radius server. Uses mnesia to store RAS details, 
-%%%           and relies on external implementation modules for the 
+%%% Purpose : Generic Radius server. Uses mnesia to store RAS details,
+%%%           and relies on external implementation modules for the
 %%%           authentication/accounting logic.
 %%% Created :  8 Dec 1999 by ottuser local account <otpuser@tiger>
 %%% Todo    : Add counters, duplicate packet handling.
@@ -103,7 +103,7 @@ init({Interface, Port}) ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%----------------------------------------------------------------------
-handle_call(Request, From, State) ->
+handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
 
@@ -113,7 +113,7 @@ handle_call(Request, From, State) ->
 %%          {noreply, State, Timeout} |
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%----------------------------------------------------------------------
-handle_cast(Msg, State) ->
+handle_cast(_Msg, State) ->
     {noreply, State}.
 
 %%----------------------------------------------------------------------
@@ -132,7 +132,7 @@ handle_info({udp, Socket, IP, InPortNo, Packet} = Req, State) ->
 		    ets:insert(T, {{Req_id, IP}, Pid}),
                     inet:setopts(Socket, [{active, once}]),
 		    {noreply, State};
-		[{{Req_id, IP}, Pid_old}] ->
+		[{{Req_id, IP}, _Pid_old}] ->
                     %% Duplicate request.  We assume that the previous
                     %% request will still answer.  We should probably
                     %% also store old responses for some time so we
@@ -143,7 +143,7 @@ handle_info({udp, Socket, IP, InPortNo, Packet} = Req, State) ->
                     inet:setopts(Socket, [{active, once}]),
 		    {noreply, State}
 	    end;
-	{discard, Reason, Counter} ->
+	{discard, Reason, _Counter} ->
 	    error("Discarded request from ~1000.p, Reason: ~1000.p~n", [{IP,InPortNo}, Reason]),
             inet:setopts(Socket, [{active, once}]),
 	    {noreply, State}
@@ -160,9 +160,9 @@ handle_info({discard, IP, Req_id, Nas_prop, Reason}, State) ->
     ets:delete(State#state.transacts, {Req_id, IP}),
     {noreply, State};
 
-handle_info({'EXIT', Pid, normal}, State) ->
+handle_info({'EXIT', _Pid, normal}, State) ->
     {noreply, State};
-handle_info({'EXIT', Pid, Reason}, State) ->
+handle_info({'EXIT', Pid, _Reason}, State) ->
     T = State#state.transacts,
     case ets:match_object(T, {'_', Pid}) of
 	[{{Tr_id, IP}, Pid}] ->
@@ -171,7 +171,7 @@ handle_info({'EXIT', Pid, Reason}, State) ->
 	[] ->
 	    {noreply, State}
     end;
-handle_info(Info, State) ->
+handle_info(_Info, State) ->
     {noreply, State}.
 
 %%----------------------------------------------------------------------
@@ -179,7 +179,7 @@ handle_info(Info, State) ->
 %% Purpose: Shutdown the server
 %% Returns: any (ignored by gen_server)
 %%----------------------------------------------------------------------
-terminate(Reason, State) ->
+terminate(_Reason, State) ->
     gen_udp:close(State#state.socket),
     ok.
 
@@ -188,7 +188,7 @@ terminate(Reason, State) ->
 %% Purpose: Convert process state when code is changed
 %% Returns: {ok, NewState}
 %%----------------------------------------------------------------------
-code_change(OldVsn, State, Extra) ->
+code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %%%----------------------------------------------------------------------
@@ -211,7 +211,7 @@ dec_radius(IP, Packet, Port) ->
 	    {discard, "Radius Request from non allowed IP address.", dis_bad_ras}
     end.
 
-get_trid(<<Code, Tr_id, _/binary>>) ->
+get_trid(<<_Code, Tr_id, _/binary>>) ->
     {ok, Tr_id};
 get_trid(_) ->
     {discard, "Radius request packet size too small to start"}.
@@ -242,7 +242,7 @@ dbg(_, _, _) -> ok.
 %% with nice fault isolation and allows remote LDAP servers to be as
 %% slow as they like :)
 %%-----------------------------------------------------------------------
-radius(Server_pid, {udp, Socket, IP, InPortNo, Packet}, Req_id, Nas_prop) ->
+radius(Server_pid, {udp, _Socket, IP, InPortNo, Packet}, Req_id, Nas_prop) ->
     case catch eradius_lib:dec_packet(Packet) of
         #rad_pdu{} = Req_pdu ->
             {M, F} = Nas_prop#nas_prop.mf,

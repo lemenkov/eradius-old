@@ -18,21 +18,21 @@
 
 %%--------------------------------------------------------------------
 %% External exports
--export([start_link/0, acc_on/1, acc_off/1, 
-	 acc_start/1, acc_stop/1, 
-	 validate_servers/1, start/0, 
-	 set_user/2, set_nas_ip_address/1, set_nas_ip_address/2, 
+-export([start_link/0, acc_on/1, acc_off/1,
+	 acc_start/1, acc_stop/1,
+	 validate_servers/1, start/0,
+	 set_user/2, set_nas_ip_address/1, set_nas_ip_address/2,
  	 set_sockopts/2,
-	 set_login_time/1, set_logout_time/1, set_session_id/2, new/0, 
+	 set_login_time/1, set_logout_time/1, set_session_id/2, new/0,
 	 set_radacct/1, set_attr/3, set_vend_attr/3, acc_update/1,
 	 set_servers/2, set_timeout/2, set_login_time/2,  set_vendor_id/2,
-	 set_logout_time/2, set_tc_ureq/1, 
+	 set_logout_time/2, set_tc_ureq/1,
 	 set_tc_itimeout/1,set_tc_stimeout/1,
-	 set_tc_areset/1, set_tc_areboot/1, 
+	 set_tc_areset/1, set_tc_areboot/1,
 	 set_tc_nasrequest/1, set_tc_nasreboot/1]).
 
 %% gen_server callbacks
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, 
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
 -ifdef(debug).
@@ -42,12 +42,12 @@
 %% The State record
 -record(s, {
 	  r         % #radacct{} record
-	 }).   
+	 }).
 
 -define(SERVER,     ?MODULE).
 -define(TABLENAME,  ?MODULE).
 -define(PORT,       1813).     % standard port for Radius Accounting
--define(TIMEOUT,    10).       
+-define(TIMEOUT,    10).
 
 
 %%% ====================================================================
@@ -58,84 +58,91 @@
 new() -> #rad_accreq{}.
 
 %%% Set (any) Attribute
-set_attr(R, Type, Bval) when record(R,rad_accreq),integer(Type),binary(Bval)->
+set_attr(R, Type, Bval) when is_record(R,rad_accreq),
+                             is_integer(Type),
+                             is_binary(Bval)->
     StdAttrs = R#rad_accreq.std_attrs,
     R#rad_accreq{std_attrs = [{Type, Bval} | StdAttrs]}.
 
 %%% Vendor Attributes
-set_vend_attr(R, Type, Bval) when record(R,rad_accreq),
-				  integer(Type),binary(Bval)->
+set_vend_attr(R, Type, Bval) when is_record(R,rad_accreq),
+                                  is_integer(Type),
+                                  is_binary(Bval)->
     VendAttrs = R#rad_accreq.vend_attrs,
     R#rad_accreq{vend_attrs = [{Type, Bval} | VendAttrs]}.
 
 %%% Vendor Id
-set_vendor_id(R, VendId) when record(R, rad_accreq),integer(VendId) ->
+set_vendor_id(R, VendId) when is_record(R, rad_accreq),
+                              is_integer(VendId) ->
     R#rad_accreq{vend_id = VendId}.
 
 %%% User
-set_user(R, User) when record(R, rad_accreq) ->
+set_user(R, User) when is_record(R, rad_accreq) ->
     R#rad_accreq{user = any2bin(User)}.
 
 %%% NAS-IP
-set_nas_ip_address(R) when record(R, rad_accreq) ->
+set_nas_ip_address(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{nas_ip = nas_ip_address()}.
 
-set_nas_ip_address(R, Ip) when record(R, rad_accreq),tuple(Ip) ->
+set_nas_ip_address(R, Ip) when is_record(R, rad_accreq),
+                               is_tuple(Ip) ->
     R#rad_accreq{nas_ip = Ip}.
 
 %%% Extra socket options
-set_sockopts(R, SockOpts) when record(R, rad_accreq),list(SockOpts) ->
+set_sockopts(R, SockOpts) when is_record(R, rad_accreq),
+                               is_list(SockOpts) ->
     R#rad_accreq{sockopts = SockOpts}.
 
 %%% Login / Logout
 set_login_time(R) ->
     set_login_time(R, erlang:now()).
 
-set_login_time(R, Login) when record(R, rad_accreq) ->
+set_login_time(R, Login) when is_record(R, rad_accreq) ->
     R#rad_accreq{login_time = Login}.
 
 set_logout_time(R) ->
      set_logout_time(R, erlang:now()).
 
-set_logout_time(R, Logout) when record(R, rad_accreq) ->
+set_logout_time(R, Logout) when is_record(R, rad_accreq) ->
     SessTime = compute_session_time(R#rad_accreq.login_time, Logout),
     R#rad_accreq{session_time = SessTime,
 		 logout_time = Logout}.
 
 %%% Terminate Cause
-set_tc_ureq(R) when record(R, rad_accreq) ->
+set_tc_ureq(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCUser_Request}.
 
-set_tc_itimeout(R) when record(R, rad_accreq) ->
+set_tc_itimeout(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCIdle_Timeout}.
 
-set_tc_stimeout(R) when record(R, rad_accreq) ->
+set_tc_stimeout(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCSession_Timeout}.
 
-set_tc_areset(R) when record(R, rad_accreq) ->
+set_tc_areset(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCAdmin_Reset}.
 
-set_tc_areboot(R) when record(R, rad_accreq) ->
+set_tc_areboot(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCAdmin_Reboot}.
 
-set_tc_nasrequest(R) when record(R, rad_accreq) ->
+set_tc_nasrequest(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCNAS_Request}.
 
-set_tc_nasreboot(R) when record(R, rad_accreq) ->
+set_tc_nasreboot(R) when is_record(R, rad_accreq) ->
     R#rad_accreq{term_cause = ?RTCNAS_Reboot}.
 
 %%% Session ID
-set_session_id(R, Id) when record(R, rad_accreq) ->
+set_session_id(R, Id) when is_record(R, rad_accreq) ->
     R#rad_accreq{session_id = any2bin(Id)}.
 
 %%% Server Info
-set_servers(R, Srvs) when record(R, rad_accreq) ->
+set_servers(R, Srvs) when is_record(R, rad_accreq) ->
     R#rad_accreq{servers = Srvs}.
 
-set_timeout(R, Timeout) when record(R, rad_accreq),integer(Timeout) ->
+set_timeout(R, Timeout) when is_record(R, rad_accreq),
+                             is_integer(Timeout) ->
     R#rad_accreq{timeout = Timeout}.
 
-set_radacct(Radacct) when record(Radacct,radacct) ->
+set_radacct(Radacct) when is_record(Radacct,radacct) ->
     gen_server:call(?SERVER, {set_radacct, Radacct}).
 
 
@@ -156,23 +163,23 @@ start() ->
 
 %%-----------------------------------------------------------------
 %% Func: auth(User, Passwd, AuthSpec)
-%% Types: 
-%% Purpose: 
+%% Types:
+%% Purpose:
 %%-----------------------------------------------------------------
 
-acc_on(Req) when record(Req,rad_accreq) ->
+acc_on(Req) when is_record(Req,rad_accreq) ->
     gen_server:cast(?SERVER, {acc_on, Req}).
 
-acc_off(Req) when record(Req,rad_accreq) ->
+acc_off(Req) when is_record(Req,rad_accreq) ->
     gen_server:cast(?SERVER, {acc_off, Req}).
 
-acc_start(Req) when record(Req,rad_accreq) ->
+acc_start(Req) when is_record(Req,rad_accreq) ->
     gen_server:cast(?SERVER, {acc_start, Req}).
 
-acc_stop(Req) when record(Req,rad_accreq) ->
+acc_stop(Req) when is_record(Req,rad_accreq) ->
     gen_server:cast(?SERVER, {acc_stop, Req}).
 
-acc_update(Req) when record(Req,rad_accreq) ->
+acc_update(Req) when is_record(Req,rad_accreq) ->
     gen_server:cast(?SERVER, {acc_update, Req}).
 
 
@@ -195,10 +202,10 @@ init([]) ->
 create_ets_table() ->
     ets:new(?TABLENAME, [named_table, public]),
     ets:insert(?TABLENAME, {id_counter, 0}).
- 
-get_id() -> 
+
+get_id() ->
     bump_id().
- 
+
 bump_id() ->
     ets:update_counter(?TABLENAME, id_counter, 1).
 
@@ -213,7 +220,7 @@ bump_id() ->
 %%          {stop, Reason, Reply, State}   | (terminate/2 is called)
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%--------------------------------------------------------------------
-handle_call({set_radacct, R}, _From, State) when record(R, radacct) ->
+handle_call({set_radacct, R}, _From, State) when is_record(R, radacct) ->
     {reply, ok, State#s{r = R}}.
 
 %%--------------------------------------------------------------------
@@ -260,7 +267,7 @@ get_servers(Req,State) ->
 	{X,X} ->
 	    %% Ok, Req hadn't set the servers so lets
 	    %% use whatever we have in the State.
-	    if record(State#s.r, radacct) -> 
+	    if is_record(State#s.r, radacct) ->
 		    R = State#s.r,
 		    {R#radacct.servers, R#radacct.timeout};
 	       true ->
@@ -269,8 +276,8 @@ get_servers(Req,State) ->
 	{Srvs,_} ->
 	    {Srvs, Req#rad_accreq.timeout}
     end.
-	 
-	    
+
+
 
 %%--------------------------------------------------------------------
 %% Function: handle_info/2
@@ -316,13 +323,13 @@ do_punch([[Ip,Port,Shared] | Rest], Timeout, Req) ->
 	    %% NB: We could implement a re-send strategy here
 	    %% along the lines of what the RFC proposes.
 	    do_punch(Rest, Timeout, Req);
-	Resp when record(Resp, rad_pdu) ->
+	Resp when is_record(Resp, rad_pdu) ->
 	    %% Not really necessary...
-	    if record(Resp#rad_pdu.cmd, rad_accresp) -> true;
+	    if is_record(Resp#rad_pdu.cmd, rad_accresp) -> true;
 	       true                                  -> false
 	    end
     end.
-	    
+
 send_recv_msg(Ip, Port, Timeout, Req) ->
     {ok, S} = gen_udp:open(0, [binary]),
     gen_udp:send(S, Ip, Port, Req),
@@ -331,15 +338,15 @@ send_recv_msg(Ip, Port, Timeout, Req) ->
     Resp.
 
 recv_wait(S, Timeout) ->
-    receive 
-	{udp, S, _IP, _Port, Packet} -> 
+    receive
+	{udp, S, _IP, _Port, Packet} ->
 	    eradius_lib:dec_packet(Packet)
     after Timeout ->
-	    timeout 
+	    timeout
     end.
 
 
-%% Login = Logout = {MSec, Sec, uSec} | integer()
+%% Login = Logout = {MSec, Sec, uSec} | is_integer()
 %% (In the second form it is erlang:now() in seconds)
 compute_session_time(Login0, Logout0) ->
     Login = to_now(Login0),
@@ -354,9 +361,9 @@ to_now(Now) when is_integer(Now) ->
     {Now div 1000000, Now rem 1000000, 0}.
 
 
-any2bin(I) when integer(I) -> list_to_binary(integer_to_list(I));
-any2bin(L) when list(L)    -> list_to_binary(L);
-any2bin(B) when binary(B)  -> B.
+any2bin(I) when is_integer(I) -> list_to_binary(integer_to_list(I));
+any2bin(L) when is_list(L)    -> list_to_binary(L);
+any2bin(B) when is_binary(B)  -> B.
 
 
 %%%

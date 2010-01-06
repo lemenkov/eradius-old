@@ -14,7 +14,7 @@
 -include("eradius_dict.hrl").
 -include("dictionary_alteon.hrl").
 
--import(eradius_acc, 
+-import(eradius_acc,
 	[set_user/2, set_nas_ip_address/1, set_nas_ip_address/2,
 	 set_login_time/1, set_logout_time/1, set_session_id/2, new/0,
 	 set_radacct/1, set_attr/3, set_vend_attrs/2, acc_update/1,
@@ -24,7 +24,7 @@
 
 
 %%% Radius shortcuts
-local() -> 
+local() ->
     go({127,0,0,1}, "tobbe", "qwe123", "qwe123", {127,0,0,1}).
 
 duva(Passwd) ->
@@ -70,9 +70,9 @@ print_result(Res) ->
 pa([{K, V} | As]) ->
     case eradius_dict:lookup(K) of
 	[A] ->
-	    io:format("     ~s = ~p~n",[A#attribute.name, 
+	    io:format("     ~s = ~p~n",[A#attribute.name,
 					to_list(V, A#attribute.type)]);
-	_ -> 
+	_ ->
 	    io:format("  <not found in dictionary>: ~p~n", [{K,V}])
     end,
     pa(As);
@@ -176,7 +176,7 @@ set_stop_reason(R, ?REASON_TERMINATE) -> set_tc_nasreboot(R).
 %%% Our own IP address
 nas_ip_address() ->
     case catch inet:gethostbyname(element(2,inet:gethostname())) of
-	{ok,H} when record(H,hostent) ->
+	{ok,H} when is_record(H,hostent) ->
 	    hd(H#hostent.h_addr_list);
 	_ ->
 	    io:format("WARNING: failed to get local IP address!~n",[]),
@@ -185,20 +185,18 @@ nas_ip_address() ->
 
 sleep(Sec) ->
     receive after Sec*1000 -> true end.
-    
+
 
 to_list(B, string)  -> binary_to_list(B);
 to_list(B, octets)  -> B;
 to_list(B, integer) -> b2i(B);
 to_list(B, ipaddr)  -> b2ip(B);
 to_list(D, date)    -> D.  % FIXME !
-		
+
 b2i(<<I:32>>)          -> I;
 b2i(<<I:16>>)          -> I;
 b2i(<<I:8>>)           -> I;
-b2i(I) when integer(I) -> I.
+b2i(I) when is_integer(I) -> I.
 
 b2ip(<<A:8,B:8,C:8,D:8>>) -> {A,B,C,D};
 b2ip({A,B,C,D})           -> {A,B,C,D}.
-    
-    
