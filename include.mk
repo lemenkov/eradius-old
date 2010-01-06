@@ -1,3 +1,6 @@
+ERL		= erl
+ERLC	= erlc
+
 EBIN_DIR := ../ebin
 DOC_DIR  := ../doc
 EMULATOR := beam
