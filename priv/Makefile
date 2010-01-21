@@ -8,6 +8,7 @@ DICTMAPS=dictionary.map \
 	 dictionary_ascend.map \
 	 dictionary_bay.map \
 	 dictionary_bintec.map \
+	 dictionary_cablelabs.map \
 	 dictionary_cabletron.map \
 	 dictionary_cisco.map \
 	 dictionary_cisco_bbsm.map \
@@ -71,6 +72,9 @@ dictionary_bay.map: dictionaries/dictionary.bay
 	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
 
 dictionary_bintec.map: dictionaries/dictionary.bintec
+	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
+
+dictionary_cablelabs.map: dictionaries/dictionary.cablelabs
 	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
 
 dictionary_cabletron.map: dictionaries/dictionary.cabletron
