@@ -15,7 +15,7 @@
   {registered, [
                 eradius,
                 eradius_acc,
-                eradius_dict,
+                eradius_dict
                ]},
   {applications, [
                   kernel,
