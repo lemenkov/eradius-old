@@ -5,7 +5,7 @@
 %%% Purpose : eradius test code
 %%% Created : 25 Sep 2003 by Torbjorn Tornkvist <tobbe@bluetail.com>
 %%%----------------------------------------------------------------------
--export([local/0, duva/1, acc/0]).
+-export([local/0, local/3, duva/1, acc/0]).
 -export([go/5]).
 
 -include_lib("kernel/include/inet.hrl").
@@ -25,7 +25,10 @@
 
 %%% Radius shortcuts
 local() ->
-    go({127,0,0,1}, "tobbe", "qwe123", "qwe123", {127,0,0,1}).
+    local("tobbe", "qwe123", "qwe123").
+
+local(Name, Pass, Shared) ->
+    go({127,0,0,1}, Name, Pass, Shared, {127,0,0,1}).
 
 duva(Passwd) ->
     go({192,168,128,1}, "support", Passwd, Passwd, {192,168,128,32}).
