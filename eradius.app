@@ -8,6 +8,7 @@
   {modules, [
              eradius,
              eradius_acc,
+             eradius_app,
              eradius_dict,
              eradius_lib,
              eradius_server
@@ -21,6 +22,7 @@
                   kernel,
                   stdlib
                  ]},
+  {mod, {eradius_app, []}},
   {env, []}
  ]
 }.

@@ -20,7 +20,8 @@
 
 -export([
          start_link/0,
-         start/0
+         start/0,
+         stop/0
         ]).
 
 -export([auth/1, auth/3, auth/4, default_port/0,
@@ -46,6 +47,12 @@
 default_port() -> ?PORT.
 
 
+start() ->
+    application:start(eradius).
+
+stop() ->
+    application:stop(eradius).
+
 
 %%====================================================================
 %% External functions
@@ -55,12 +62,7 @@ default_port() -> ?PORT.
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
-    eradius_dict:start_link(),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
-
-start() ->
-    eradius_dict:start(),
-    gen_server:start({local, ?SERVER}, ?MODULE, [], []).
 
 %%-----------------------------------------------------------------
 %% --- Authenticate a user. ---
