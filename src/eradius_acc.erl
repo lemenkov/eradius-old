@@ -227,8 +227,7 @@ code_change(_OldVsn, State, _Extra) ->
 punch_acc(Req, State, Stype) ->
     case get_servers(Req,State) of
 	{Srvs,Timeout} ->
-	    spawn(fun() -> do_punch(Srvs, Timeout,
-		 Req#rad_accreq{status_type = Stype}) end);
+	    do_punch(Srvs, Timeout, Req#rad_accreq{status_type = Stype});
 	_ ->
 	    false
     end.
