@@ -44,7 +44,7 @@ ATTRIBUTE CableLabs-Electronic-Surveillance-Indication 44 octets
 ATTRIBUTE CableLabs-Redirected-From-Party-Number 45 string
 ATTRIBUTE CableLabs-Redirected-To-Party-Number 46 string
 ATTRIBUTE CableLabs-Electronic-Surveillance-DF-Security 47 octets
-ATTRIBUTE CableLabs-CCC-ID 48 octets
+ATTRIBUTE CableLabs-CCC-ID 48 integer
 ATTRIBUTE CableLabs-Financial-Entity-ID 49 string
 ATTRIBUTE CableLabs-Flow-Direction 50 integer
 ATTRIBUTE CableLabs-Signal-Type 51 integer

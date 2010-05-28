@@ -6,13 +6,13 @@ all: dict priv src test
 dict:
 	${MAKE} -C src ../ebin/eradius_dict.beam
 
-priv:
+priv: dict
 	${MAKE} -C priv
 
-src:
+src: priv
 	${MAKE} -C src
 
-test:
+test: priv
 	${MAKE} -C test ../ebin/et.beam
 
 clean:
