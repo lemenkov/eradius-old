@@ -158,7 +158,11 @@ enc_cmd(R) when is_record(R, rad_accreq) ->
       enc_attrib(#rad_accreq.nas_ip,      R, Def, ?RNAS_Ip_Address,  ipaddr),
       enc_std_attrs(R),
       enc_vendor_attrs(R)
-     ]}.
+     ]};
+enc_cmd(R) when is_record(R, rad_statusreq) ->
+	{?RAccess_Accept,
+		[]
+	}.
 
 enc_std_attrs(R) ->
     enc_attributes(R#rad_accreq.std_attrs).
@@ -233,7 +237,9 @@ dec_packet0(Packet) ->
 	?RAccounting_Request ->
 	    P#rad_pdu{cmd = {accreq, dec_attributes(Attribs)}};
 	?RAccounting_Response ->
-	    P#rad_pdu{cmd = {accresp, dec_attributes(Attribs)}}
+	    P#rad_pdu{cmd = {accresp, dec_attributes(Attribs)}};
+	?RStatus_Request ->
+		P#rad_pdu{cmd = {statusreq, dec_attributes(Attribs)}}
     end.
 
 -define(dec_attrib(A0, Type, Val, A1),

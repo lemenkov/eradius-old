@@ -18,6 +18,7 @@
 -define(RAccounting_Request,     4).
 -define(RAccounting_Response,    5).
 -define(RAccess_Challenge,      11).
+-define(RStatus_Request,        12).
 
 %%- attribs
 -define(RUser_Name,              1).
@@ -115,5 +116,6 @@
 
 -record(rad_accresp, {}).  % accounting response
 
+-record(rad_statusreq, {}).  % status request
 
 -endif.
