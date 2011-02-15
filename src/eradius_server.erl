@@ -144,7 +144,7 @@ handle_info({udp, Socket, IP, InPortNo, Packet} = Req, State) ->
 		    {noreply, State}
 	    end;
 	{discard, Reason, _Counter} ->
-	    error("Discarded request from ~1000.p, Reason: ~1000.p~n", [{IP,InPortNo}, Reason]),
+	    error_msg("Discarded request from ~1000.p, Reason: ~1000.p~n", [{IP,InPortNo}, Reason]),
             inet:setopts(Socket, [{active, once}]),
 	    {noreply, State}
     end;
@@ -225,7 +225,7 @@ allowed_ip(IP, Port) ->
     end.
 
 
-error(Fmt, Vals) ->
+error_msg(Fmt, Vals) ->
     error_logger:error_report([{application, radius},
 			       lists:flatten(io_lib:format(Fmt, Vals))]).
 

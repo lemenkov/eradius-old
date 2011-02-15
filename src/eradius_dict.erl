@@ -242,7 +242,7 @@ pd(["ATTRIBUTE", Name, Id, Type], VName) ->
         VendId ->
             {ok,#attribute{name = d2u(Name), id = {VendId,id2i(Id)},type = l2a(Type)}}
     end;
-pd(_X, VName) ->
+pd(_X, _VName) ->
     %%io:format("Skipping: ~p~n", [_X]),
     false.
 
