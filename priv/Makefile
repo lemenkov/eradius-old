@@ -23,6 +23,7 @@ DICTMAPS=dictionary.map \
 	 dictionary_freeradius.map \
 	 dictionary_itk.map \
 	 dictionary_juniper.map \
+	 dictionary_kamailio.map \
 	 dictionary_livingston.map \
 	 dictionary_microsoft.map \
 	 dictionary_netscreen.map \
@@ -117,6 +118,9 @@ dictionary_itk.map: dictionaries/dictionary.itk
 	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
 
 dictionary_juniper.map: dictionaries/dictionary.juniper
+	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
+
+dictionary_kamailio.map: dictionaries/dictionary.kamailio
 	@erl -noshell -pa ../ebin -s eradius_dict make $^ || exit 1;
 
 dictionary_livingston.map: dictionaries/dictionary.livingston
