@@ -68,6 +68,7 @@ $INCLUDE dictionary.extreme
 $INCLUDE dictionary.freeradius
 $INCLUDE dictionary.itk
 $INCLUDE dictionary.juniper
+$INCLUDE dictionary.kamailio
 $INCLUDE dictionary.livingston
 $INCLUDE dictionary.microsoft
 $INCLUDE dictionary.nomadix
