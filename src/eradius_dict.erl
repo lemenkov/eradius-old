@@ -210,7 +210,7 @@ parse_dict(File) when is_list(File) ->
                     _ -> {Vendor, AccList}
                 end
 	end,
-    {_, L} = lists:foldl(F,{undefined, []},string:tokens(b2l(B),"\n")),
+    {_, L} = lists:foldl(F,{undefined, []},string:tokens(b2l(B),"#\n")),
     L.
 
 pd(["BEGIN-VENDOR", Name]) ->
