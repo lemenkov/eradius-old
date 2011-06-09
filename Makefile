@@ -1,20 +1,14 @@
-.PHONY: dict priv src test
+#REBAR ?= $(shell which rebar 2>/dev/null || which ./rebar)
+REBAR=./rebar
+REBAR_FLAGS ?=
 
-all: dict priv src test
+all: compile
 
-dict:
-	${MAKE} -C src ../ebin/eradius_dict.beam
+compile:
+	$(REBAR) compile $(REBAR_FLAGS)
 
-priv: dict
-	${MAKE} -C priv
-
-src: priv
-	${MAKE} -C src
-
-test: priv
-	${MAKE} -C test ../ebin/et.beam
+test:
+	$(REBAR) eunit $(REBAR_FLAGS)
 
 clean:
-	${MAKE} -C priv $@
-	${MAKE} -C src  $@
-	${MAKE} -C test $@
+	$(REBAR) clean $(REBAR_FLAGS)
