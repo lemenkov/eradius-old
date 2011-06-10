@@ -5,14 +5,7 @@
   {description, "RADIUS authentication/accounting library"},
   {vsn, "0.5"},
   {id, "Eradius"},
-  {modules, [
-             eradius,
-             eradius_acc,
-             eradius_app,
-             eradius_dict,
-             eradius_lib,
-             eradius_server
-            ]},
+  {modules, []},
   {registered, [
                 eradius,
                 eradius_acc,
