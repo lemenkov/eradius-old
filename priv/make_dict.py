@@ -47,9 +47,9 @@ def parse(Filename):
 				VendorDefault = True
 			if AttrList[0] == 'END-VENDOR':
 				VendorDefault = False
-			if AttrList[0] == '$INCLUDE':
-				print AttrList
-				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
+#			if AttrList[0] == '$INCLUDE':
+#				print AttrList
+#				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
 			if AttrList[0] == 'ATTRIBUTE':
 #				if len(AttrList) > 5:
 #					break
