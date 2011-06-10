@@ -13,6 +13,7 @@
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
 -include("dictionary.hrl").
+-include("dictionary_rfc2865.hrl").
 
 -define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
 
