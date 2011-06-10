@@ -5,7 +5,7 @@ import os
 BaseDir="./priv/dictionaries/"
 
 def make_attr_list(String):
-	SplittedStr = String.partition('#')[0].split()
+	SplittedStr = String.split('#')[0].split()
 
 	if SplittedStr == []:
 		return []
