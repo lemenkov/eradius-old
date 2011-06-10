@@ -55,7 +55,7 @@ def parse(Filename):
 			if AttrList[0] == 'ATTRIBUTE':
 #				if len(AttrList) > 5:
 #					break
-				if len(AttrList) == 5 and Vendor != {}:
+				if (len(AttrList) == 4 or len(AttrList) == 5) and Vendor != {}:
 					# Vendor-specific data
 					if VendorDefault:
 						FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
