@@ -34,6 +34,7 @@ def parse(Filename):
 
 	FdIn = open(BaseDir + Filename)
 	FdOut = open("./include/" + Filename.replace('.', '_') + ".hrl", 'w')
+	FdOutMap = open("./priv/" + Filename.replace('.', '_') + ".map", 'w')
 
 	line = FdIn.readline()
 	while line:
@@ -43,6 +44,7 @@ def parse(Filename):
 			if AttrList[0] == 'VENDOR' and len(AttrList) > 2:
 				Vendor[AttrList[1]] = int(AttrList[2])
 				FdOut.write("-define( %s , %s ).\n" % (to_atom(AttrList[1]), AttrList[2]))
+				FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (to_atom(AttrList[2]), AttrList[1]))
 			if AttrList[0] == 'BEGIN-VENDOR' and Vendor != {}:
 				VendorDefault = True
 			if AttrList[0] == 'END-VENDOR':
@@ -57,14 +59,18 @@ def parse(Filename):
 					# Vendor-specific data
 					if VendorDefault:
 						FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
+						FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
 					else:
 						FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[AttrList[4]], to_int(AttrList[2]) ))
+						FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[AttrList[4]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
 				else:
 					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
+					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
 		line = FdIn.readline()
 
 	FdIn.close()
 	FdOut.close()
+	FdOutMap.close()
 
 DictList = os.listdir(BaseDir)
 for i in DictList:
