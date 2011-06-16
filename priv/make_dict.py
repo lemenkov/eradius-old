@@ -53,19 +53,16 @@ def parse(Filename):
 #				print AttrList
 #				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
 			if AttrList[0] == 'ATTRIBUTE':
-#				if len(AttrList) > 5:
-#					break
-				if (len(AttrList) == 4 or len(AttrList) == 5) and Vendor != {}:
-					# Vendor-specific data
-					if VendorDefault:
-						FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
-						FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
-					else:
-						FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[AttrList[4]], to_int(AttrList[2]) ))
-						FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[AttrList[4]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
-				else:
+				if (len(AttrList) >= 4) and VendorDefault and Vendor != {}:
+					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
+					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				elif (len(AttrList) >= 5) and Vendor != {}:
+					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[AttrList[4]], to_int(AttrList[2]) ))
+					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[AttrList[4]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				elif (len(AttrList) == 4) and VendorDefault == False:
 					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
 					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+
 		line = FdIn.readline()
 
 	FdIn.close()
