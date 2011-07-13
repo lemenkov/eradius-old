@@ -1,13 +1,14 @@
+# -*- text -*-
 #
 #	 Cisco VPN 5000 Concentrator Dictionary
 #
 #	http://www.cisco.com/univercd/cc/td/doc/product/access/acs_soft/csacs4nt/csnt30/user/ad.htm
 #
-#	$Id: dictionary.cisco.vpn5000,v 1.1 2003/10/27 23:39:40 etnt Exp $
+#	$Id$
 #
-VENDOR		Cisco-VPN5000	255
+VENDOR		Cisco-VPN5000			255
 
-BEGIN-VENDOR  Cisco-VPN5000
+BEGIN-VENDOR	Cisco-VPN5000
 ATTRIBUTE	CVPN5000-Tunnel-Throughput		1	integer
 ATTRIBUTE	CVPN5000-Client-Assigned-IP		2	string
 ATTRIBUTE	CVPN5000-Client-Real-IP			3	string
