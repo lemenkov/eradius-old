@@ -90,7 +90,7 @@ def parse(Filename):
 
 		line = FdIn.readline()
 
-	FdOut.write("-endif.\n")
+	FdOut.write("\n-endif.\n")
 
 	FdIn.close()
 	FdOut.close()
