@@ -20,29 +20,8 @@
 -define(RAccess_Challenge,      11).
 -define(RStatus_Request,        12).
 
--define(RStatus_Type,           40).
--define(RSession_Id,            44).
--define(RSession_Time,          46).
--define(RTerminate_Cause,       49).
-
-%%- attribute values
--define(RStatus_Type_Start,      1).
--define(RStatus_Type_Stop,       2).
--define(RStatus_Type_Update,     3).  % Interim-Update
--define(RStatus_Type_On,         7).
--define(RStatus_Type_Off,        8).
-
 %%- Set radius accounting attributes
 -define(ACC_ATTR(Key,Val), {Key,Val}).
-
-%%- Terminate Cause values
--define(RTCUser_Request,           1).
--define(RTCIdle_Timeout,           4).
--define(RTCSession_Timeout,        5).
--define(RTCAdmin_Reset,            6).
--define(RTCAdmin_Reboot,           7).
--define(RTCNAS_Request,           10).
--define(RTCNAS_Reboot,            11).
 
 %% In a server we need to store properties of a NAS. This is used as
 %% an mnesia record as well as in call processing.

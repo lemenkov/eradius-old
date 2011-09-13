@@ -14,6 +14,7 @@
 %%--------------------------------------------------------------------
 
 -include("eradius_lib.hrl").
+-include("dictionary_rfc2866.hrl").
 -include_lib("kernel/include/inet.hrl").
 
 -define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
@@ -119,25 +120,25 @@ set_logout_time(R, Logout) when is_record(R, rad_accreq) ->
 
 %%% Terminate Cause
 set_tc_ureq(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCUser_Request}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_User_Request}.
 
 set_tc_itimeout(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCIdle_Timeout}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_Idle_Timeout}.
 
 set_tc_stimeout(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCSession_Timeout}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_Session_Timeout}.
 
 set_tc_areset(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCAdmin_Reset}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_Admin_Reset}.
 
 set_tc_areboot(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCAdmin_Reboot}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_Admin_Reboot}.
 
 set_tc_nasrequest(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCNAS_Request}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_NAS_Request}.
 
 set_tc_nasreboot(R) when is_record(R, rad_accreq) ->
-    R#rad_accreq{term_cause = ?RTCNAS_Reboot}.
+    R#rad_accreq{term_cause = ?Val_Acct_Terminate_Cause_NAS_Reboot}.
 
 %%% Session ID
 set_session_id(R, Id) when is_record(R, rad_accreq) ->
@@ -240,23 +241,23 @@ handle_call({set_radacct, R}, _From, State) when is_record(R, radacct) ->
 %%          {stop, Reason, State}            (terminate/2 is called)
 %%--------------------------------------------------------------------
 handle_cast({acc_on, Req}, State) ->
-    punch_acc(Req, State, ?RStatus_Type_On),
+    punch_acc(Req, State, ?Val_Acct_Status_Type_Accounting_On),
     {noreply, State};
 %%
 handle_cast({acc_off, Req}, State) ->
-    punch_acc(Req, State, ?RStatus_Type_Off),
+    punch_acc(Req, State, ?Val_Acct_Status_Type_Accounting_Off),
     {noreply, State};
 %%
 handle_cast({acc_start, Req}, State) ->
-    punch_acc(Req, State, ?RStatus_Type_Start),
+    punch_acc(Req, State, ?Val_Acct_Status_Type_Start),
     {noreply, State};
 %%
 handle_cast({acc_stop, Req}, State) ->
-    punch_acc(Req, State, ?RStatus_Type_Stop),
+    punch_acc(Req, State, ?Val_Acct_Status_Type_Stop),
     {noreply, State};
 %%
 handle_cast({acc_update, Req}, State) ->
-    punch_acc(Req, State, ?RStatus_Type_Update),
+    punch_acc(Req, State, ?Val_Acct_Status_Type_Interim_Update),
     {noreply, State}.
 
 punch_acc(Req, State, Stype) ->

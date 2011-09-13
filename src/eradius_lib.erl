@@ -13,6 +13,7 @@
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
 -include("dictionary_rfc2865.hrl").
+-include("dictionary_rfc2866.hrl").
 
 -define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
 
@@ -150,10 +151,10 @@ enc_cmd(R) when is_record(R, rad_reject) ->
 enc_cmd(R) when is_record(R, rad_accreq) ->
     Def = #rad_accreq{},
     {?RAccounting_Request,
-     [enc_attrib(#rad_accreq.status_type, R, Def, ?RStatus_Type,     integer),
-      enc_attrib(#rad_accreq.session_time,R, Def, ?RSession_Time,    integer),
-      enc_attrib(#rad_accreq.session_id,  R, Def, ?RSession_Id,      binary),
-      enc_attrib(#rad_accreq.term_cause,  R, Def, ?RTerminate_Cause, integer),
+     [enc_attrib(#rad_accreq.status_type, R, Def, ?Acct_Status_Type,     integer),
+      enc_attrib(#rad_accreq.session_time,R, Def, ?Acct_Session_Time,    integer),
+      enc_attrib(#rad_accreq.session_id,  R, Def, ?Acct_Session_Id,      binary),
+      enc_attrib(#rad_accreq.term_cause,  R, Def, ?Acct_Terminate_Cause, integer),
       enc_attrib(#rad_accreq.user,        R, Def, ?User_Name,       binary),
       enc_attrib(#rad_accreq.nas_ip,      R, Def, ?NAS_IP_Address,  ipaddr),
       enc_std_attrs(R),
