@@ -12,7 +12,6 @@
 
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
--include("dictionary.hrl").
 -include("dictionary_rfc2865.hrl").
 
 -define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
@@ -122,30 +121,30 @@ type_conv(V, date) when
 enc_cmd(R) when is_record(R, rad_request) ->
     Def = #rad_request{},
     {?RAccess_Request,
-     [enc_attrib(#rad_request.user,      R, Def, ?RUser_Name,       binary),
-      enc_attrib(#rad_request.passwd,    R, Def, ?RUser_Passwd,     binary),
-      enc_attrib(#rad_request.nas_ip,    R, Def, ?RNAS_Ip_Address,  ipaddr),
-      enc_attrib(#rad_request.state,     R, Def, ?RState,           binary)
+     [enc_attrib(#rad_request.user,      R, Def, ?User_Name,       binary),
+      enc_attrib(#rad_request.passwd,    R, Def, ?User_Password,     binary),
+      enc_attrib(#rad_request.nas_ip,    R, Def, ?NAS_IP_Address,  ipaddr),
+      enc_attrib(#rad_request.state,     R, Def, ?State,           binary)
      ]};
 enc_cmd(R) when is_record(R, rad_accept) ->
     Def = #rad_accept{},
     {?RAccess_Accept,
-     [enc_attrib(#rad_accept.user,        R, Def, ?RUser_Name,       binary),
+     [enc_attrib(#rad_accept.user,        R, Def, ?User_Name,       binary),
       lists:map(fun(RM) ->
-			<<?RVendor_Specific:8, (size(RM)+2):8, RM/binary>>
+			<<?Vendor_Specific:8, (size(RM)+2):8, RM/binary>>
 		end,
 		R#rad_accept.vendor_specifics)]
     };
 enc_cmd(R) when is_record(R, rad_challenge) ->
     Def = #rad_challenge{},
     {?RAccess_Challenge,
-     [enc_attrib(#rad_challenge.state,   R, Def, ?RState,           binary),
-      lists:map(fun(RM) -> <<?RReply_Msg:8, (size(RM)+2):8, RM/binary>> end,
+     [enc_attrib(#rad_challenge.state,   R, Def, ?State,           binary),
+      lists:map(fun(RM) -> <<?Reply_Message:8, (size(RM)+2):8, RM/binary>> end,
 		R#rad_challenge.reply_msgs)]
     };
 enc_cmd(R) when is_record(R, rad_reject) ->
     {?RAccess_Reject,
-     lists:map(fun(RM) -> <<?RReply_Msg:8, (size(RM)+2):8, RM/binary>> end,
+     lists:map(fun(RM) -> <<?Reply_Message:8, (size(RM)+2):8, RM/binary>> end,
 	       R#rad_reject.reply_msgs)
     };
 enc_cmd(R) when is_record(R, rad_accreq) ->
@@ -155,8 +154,8 @@ enc_cmd(R) when is_record(R, rad_accreq) ->
       enc_attrib(#rad_accreq.session_time,R, Def, ?RSession_Time,    integer),
       enc_attrib(#rad_accreq.session_id,  R, Def, ?RSession_Id,      binary),
       enc_attrib(#rad_accreq.term_cause,  R, Def, ?RTerminate_Cause, integer),
-      enc_attrib(#rad_accreq.user,        R, Def, ?RUser_Name,       binary),
-      enc_attrib(#rad_accreq.nas_ip,      R, Def, ?RNAS_Ip_Address,  ipaddr),
+      enc_attrib(#rad_accreq.user,        R, Def, ?User_Name,       binary),
+      enc_attrib(#rad_accreq.nas_ip,      R, Def, ?NAS_IP_Address,  ipaddr),
       enc_std_attrs(R),
       enc_vendor_attrs(R)
      ]};
@@ -173,7 +172,7 @@ enc_vendor_attrs(R) ->
 		Vbins = enc_attributes(Vs),
 		Size = io_list_len(Vbins),
 		Tsz = Size + 6,
-		[[<<?RVendor_Specific:8, Tsz:8, Vid:32 >> | Vbins] | Acc]
+		[[<<?Vendor_Specific:8, Tsz:8, Vid:32 >> | Vbins] | Acc]
     end,
     lists:foldl(F, [], R#rad_accreq.vend_attrs).
 

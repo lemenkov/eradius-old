@@ -19,14 +19,6 @@
 -define(RAccounting_Response,    5).
 -define(RAccess_Challenge,      11).
 
-%%- attribs
--define(RUser_Name,              1).
--define(RUser_Passwd,            2).
--define(RNAS_Ip_Address,         4).
--define(RReply_Msg,             18).
--define(RState,                 24).
--define(RClass,                 25).
--define(RVendor_Specific,       26).
 -define(RStatus_Type,           40).
 -define(RSession_Id,            44).
 -define(RSession_Time,          46).
