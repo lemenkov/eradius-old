@@ -14,7 +14,9 @@ def make_attr_list(String):
 		if SplittedStr[0] != '$INCLUDE':
 			SplittedStr[1] = SplittedStr[1].replace('.', '')
 
-			return reduce(lambda x,y: x + y, [x.split('.') for x in SplittedStr])
+		if len(reduce(lambda x,y: x + y, [x.split('.') for x in SplittedStr])) != len(SplittedStr):
+			# Bypass floating point values
+			return []
 		else:
 			return SplittedStr
 
