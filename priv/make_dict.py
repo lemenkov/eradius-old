@@ -47,14 +47,14 @@ def parse(Filename):
 				Vendor[AttrList[1]] = int(AttrList[2])
 				FdOut.write("-define( %s , %s ).\n" % (to_atom(AttrList[1]), AttrList[2]))
 				FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (to_atom(AttrList[2]), AttrList[1]))
-			if AttrList[0] == 'BEGIN-VENDOR' and Vendor != {}:
+			elif AttrList[0] == 'BEGIN-VENDOR' and Vendor != {}:
 				VendorDefault = True
-			if AttrList[0] == 'END-VENDOR':
+			elif AttrList[0] == 'END-VENDOR':
 				VendorDefault = False
-#			if AttrList[0] == '$INCLUDE':
+#			elif AttrList[0] == '$INCLUDE':
 #				print AttrList
 #				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
-			if AttrList[0] == 'ATTRIBUTE':
+			elif AttrList[0] == 'ATTRIBUTE':
 				if (len(AttrList) == 4) and VendorDefault == False:
 #					print "Simple case: ", AttrList, Vendor, Filename
 					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
@@ -72,7 +72,9 @@ def parse(Filename):
 					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
 					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
 				else:
-					print "Unknown: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
+					print "Unknown AttrList layout: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
+			else:
+				print "Unknown Type: ", AttrList
 
 		line = FdIn.readline()
 
