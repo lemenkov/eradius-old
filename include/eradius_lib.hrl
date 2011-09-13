@@ -18,6 +18,7 @@
 -define(RAccounting_Request,     4).
 -define(RAccounting_Response,    5).
 -define(RAccess_Challenge,      11).
+-define(RStatus_Request,        12).
 
 -define(RStatus_Type,           40).
 -define(RSession_Id,            44).
@@ -107,5 +108,6 @@
 
 -record(rad_accresp, {}).  % accounting response
 
+-record(rad_statusreq, {}).  % status request
 
 -endif.
