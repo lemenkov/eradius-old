@@ -40,6 +40,10 @@ def parse(Filename):
 	FdOut = open("./include/" + Filename.replace('.', '_') + ".hrl", 'w')
 	FdOutMap = open("./priv/" + Filename.replace('.', '_') + ".map", 'w')
 
+	# Add guarding header to prevent multiple inclusion
+	FdOut.write("-ifndef(_%s_INCLUDED).\n" % Filename.upper().replace('.', '_'))
+	FdOut.write("-define(_%s_INCLUDED, true).\n\n" % Filename.upper().replace('.', '_'))
+
 	line = FdIn.readline()
 	while line:
 		AttrList = make_attr_list(line)
@@ -85,6 +89,8 @@ def parse(Filename):
 				print "Unknown Type: ", AttrList, Filename
 
 		line = FdIn.readline()
+
+	FdOut.write("-endif.\n")
 
 	FdIn.close()
 	FdOut.close()
