@@ -11,15 +11,6 @@
 
 -define(BYTE, integer-unit:8).    % Nice syntactic sugar...
 
-%%- cmds
--define(RAccess_Request,         1).
--define(RAccess_Accept,          2).
--define(RAccess_Reject,          3).
--define(RAccounting_Request,     4).
--define(RAccounting_Response,    5).
--define(RAccess_Challenge,      11).
--define(RStatus_Request,        12).
-
 %%- Set radius accounting attributes
 -define(ACC_ATTR(Key,Val), {Key,Val}).
 

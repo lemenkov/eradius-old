@@ -12,6 +12,7 @@
 
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
+-include("dictionary_freeradius_internal.hrl").
 -include("dictionary_rfc2865.hrl").
 -include("dictionary_rfc2866.hrl").
 
@@ -121,7 +122,7 @@ type_conv(V, date) when
 
 enc_cmd(R) when is_record(R, rad_request) ->
     Def = #rad_request{},
-    {?RAccess_Request,
+    {?Val_Packet_Type_Access_Request,
      [enc_attrib(#rad_request.user,      R, Def, ?User_Name,       binary),
       enc_attrib(#rad_request.passwd,    R, Def, ?User_Password,     binary),
       enc_attrib(#rad_request.nas_ip,    R, Def, ?NAS_IP_Address,  ipaddr),
@@ -129,7 +130,7 @@ enc_cmd(R) when is_record(R, rad_request) ->
      ]};
 enc_cmd(R) when is_record(R, rad_accept) ->
     Def = #rad_accept{},
-    {?RAccess_Accept,
+    {?Val_Packet_Type_Access_Accept,
      [enc_attrib(#rad_accept.user,        R, Def, ?User_Name,       binary),
       lists:map(fun(RM) ->
 			<<?Vendor_Specific:8, (size(RM)+2):8, RM/binary>>
@@ -138,19 +139,19 @@ enc_cmd(R) when is_record(R, rad_accept) ->
     };
 enc_cmd(R) when is_record(R, rad_challenge) ->
     Def = #rad_challenge{},
-    {?RAccess_Challenge,
+    {?Val_Packet_Type_Access_Challenge,
      [enc_attrib(#rad_challenge.state,   R, Def, ?State,           binary),
       lists:map(fun(RM) -> <<?Reply_Message:8, (size(RM)+2):8, RM/binary>> end,
 		R#rad_challenge.reply_msgs)]
     };
 enc_cmd(R) when is_record(R, rad_reject) ->
-    {?RAccess_Reject,
+    {?Val_Packet_Type_Access_Reject,
      lists:map(fun(RM) -> <<?Reply_Message:8, (size(RM)+2):8, RM/binary>> end,
 	       R#rad_reject.reply_msgs)
     };
 enc_cmd(R) when is_record(R, rad_accreq) ->
     Def = #rad_accreq{},
-    {?RAccounting_Request,
+    {?Val_Packet_Type_Accounting_Request,
      [enc_attrib(#rad_accreq.status_type, R, Def, ?Acct_Status_Type,     integer),
       enc_attrib(#rad_accreq.session_time,R, Def, ?Acct_Session_Time,    integer),
       enc_attrib(#rad_accreq.session_id,  R, Def, ?Acct_Session_Id,      binary),
@@ -161,7 +162,7 @@ enc_cmd(R) when is_record(R, rad_accreq) ->
       enc_vendor_attrs(R)
      ]};
 enc_cmd(R) when is_record(R, rad_statusreq) ->
-	{?RAccess_Accept,
+	{?Val_Packet_Type_Access_Accept,
 		[]
 	}.
 
@@ -227,19 +228,19 @@ dec_packet0(Packet) ->
 	end,
     P = #rad_pdu{reqid = ReqId, authenticator = Auth},
     case Cmd of
-	?RAccess_Request ->
+	?Val_Packet_Type_Access_Request ->
 	    P#rad_pdu{cmd = {request, dec_attributes(Attribs)}};
-	?RAccess_Accept ->
+	?Val_Packet_Type_Access_Accept ->
 	    P#rad_pdu{cmd = {accept, dec_attributes(Attribs)}};
-	?RAccess_Challenge ->
+	?Val_Packet_Type_Access_Challenge ->
 	    P#rad_pdu{cmd = {challenge, dec_attributes(Attribs)}};
-	?RAccess_Reject ->
+	?Val_Packet_Type_Access_Reject ->
 	    P#rad_pdu{cmd = {reject, dec_attributes(Attribs)}};
-	?RAccounting_Request ->
+	?Val_Packet_Type_Accounting_Request ->
 	    P#rad_pdu{cmd = {accreq, dec_attributes(Attribs)}};
-	?RAccounting_Response ->
+	?Val_Packet_Type_Accounting_Response ->
 	    P#rad_pdu{cmd = {accresp, dec_attributes(Attribs)}};
-	?RStatus_Request ->
+	?Val_Packet_Type_Status_Server ->
 		P#rad_pdu{cmd = {statusreq, dec_attributes(Attribs)}}
     end.
 
