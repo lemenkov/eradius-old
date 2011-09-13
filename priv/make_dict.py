@@ -14,9 +14,11 @@ def make_attr_list(String):
 		if SplittedStr[0] != '$INCLUDE':
 			SplittedStr[1] = SplittedStr[1].replace('.', '')
 
-		if len(reduce(lambda x,y: x + y, [x.split('.') for x in SplittedStr])) != len(SplittedStr):
-			# Bypass floating point values
-			return []
+			if len(reduce(lambda x,y: x + y, [x.split('.') for x in SplittedStr])) != len(SplittedStr):
+				# Bypass floating point values
+				return []
+			else:
+				return SplittedStr
 		else:
 			return SplittedStr
 
@@ -51,9 +53,8 @@ def parse(Filename):
 				VendorDefault = True
 			elif AttrList[0] == 'END-VENDOR':
 				VendorDefault = False
-#			elif AttrList[0] == '$INCLUDE':
-#				print AttrList
-#				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
+			elif AttrList[0] == '$INCLUDE':
+				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
 			elif AttrList[0] == 'ATTRIBUTE':
 				if (len(AttrList) == 4) and VendorDefault == False:
 #					print "Simple case: ", AttrList, Vendor, Filename
