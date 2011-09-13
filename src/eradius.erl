@@ -4,8 +4,6 @@
 %%% Author      : {mbj,tobbe}@bluetail.com>
 %%% Description : RADIUS Authentication
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
-%%%
-%%% $Id: eradius.erl,v 1.2 2003/11/05 21:00:03 etnt Exp $
 %%%-------------------------------------------------------------------
 -behaviour(gen_server).
 

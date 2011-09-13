@@ -4,8 +4,6 @@
 %%% Author      : Martin Bjorklund <mbj@bluetail.com>
 %%% Description : Radius encode/decode routines (RFC-2865).
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
-%%%
-%%% $Id: eradius_lib.erl,v 1.5 2004/03/26 17:47:19 seanhinde Exp $
 %%%-------------------------------------------------------------------
 -export([enc_pdu/1, enc_reply_pdu/2, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).

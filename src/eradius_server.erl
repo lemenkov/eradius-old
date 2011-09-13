@@ -6,7 +6,6 @@
 %%%           authentication/accounting logic.
 %%% Created :  8 Dec 1999 by ottuser local account <otpuser@tiger>
 %%% Todo    : Add counters, duplicate packet handling.
-%%% $Id: eradius_server.erl,v 1.1 2004/03/26 17:49:32 seanhinde Exp $
 %%%----------------------------------------------------------------------
 
 -module(eradius_server).

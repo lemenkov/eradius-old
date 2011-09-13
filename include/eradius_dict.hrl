@@ -5,8 +5,6 @@
 %%% Author      : tobbe@bluetail.com
 %%% Description : Dictionary definitions.
 %%% Created     : 25 Sep 2003 by tobbe@bluetail.com
-%%%
-%%% $Id: eradius_dict.hrl,v 1.1 2003/10/27 23:39:40 etnt Exp $
 %%%-------------------------------------------------------------------
 
 

@@ -4,8 +4,6 @@
 %%% Author  : Torbjorn Tornkvist <tobbe@bluetail.com>
 %%% Desc    : RADIUS accounting.
 %%% Created :  9 Apr 2003 by Torbjorn Tornkvist <tobbe@bluetail.com>
-%%%
-%%% $Id: eradius_acc.erl,v 1.3 2005/01/14 13:44:20 etnt Exp $
 %%%-------------------------------------------------------------------
 
 -behaviour(gen_server).

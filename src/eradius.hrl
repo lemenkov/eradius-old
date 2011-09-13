@@ -5,8 +5,6 @@
 %%% Author      : tobbe@bluetail.com
 %%% Description : Definitions for the eradius interface.
 %%% Created     : 22 Sep 2003 by tobbe@bluetail.com
-%%%
-%%% $Id: eradius.hrl,v 1.1 2003/10/27 23:39:40 etnt Exp $
 %%%-------------------------------------------------------------------
 
 %%% Error codes

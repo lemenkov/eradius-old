@@ -5,8 +5,6 @@
 %%% Author      : Martin Bjorklund <mbj@bluetail.com>
 %%% Description : Definitions for RADIUS
 %%% Created     :  7 Oct 2002 by Martin Bjorklund <mbj@bluetail.com>
-%%%
-%%% $Id: eradius_lib.hrl,v 1.4 2005/01/14 13:44:20 etnt Exp $
 %%%-------------------------------------------------------------------
 
 -define(BYTE, integer-unit:8).    % Nice syntactic sugar...
