@@ -73,8 +73,15 @@ def parse(Filename):
 					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
 				else:
 					print "Unknown AttrList layout: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
+			elif AttrList[0] == 'VALUE':
+				if (len(AttrList) == 4):
+					FdOut.write("-define( Val_%s_%s , %d ).\n" % (to_atom(AttrList[1]), to_atom(AttrList[2]), to_int(AttrList[3]) ))
+					# FIXME
+					FdOutMap.write("{value, %d, \"%s\"}.\n" % (to_int(AttrList[3]), AttrList[2]))
+				else:
+					print "Unknown Value layout: ", AttrList
 			else:
-				print "Unknown Type: ", AttrList
+				print "Unknown Type: ", AttrList, Filename
 
 		line = FdIn.readline()
 
