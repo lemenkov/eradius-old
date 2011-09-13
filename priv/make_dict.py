@@ -29,7 +29,7 @@ def to_int(ProbablyInt):
 		return int(ProbablyInt)
 
 def to_atom(Name):
-	return Name.replace('-', '_').replace('/', '_')
+	return Name.replace('-', '_').replace('/', '_').replace('+','plus')
 
 def parse(Filename):
 
