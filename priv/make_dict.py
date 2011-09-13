@@ -55,15 +55,24 @@ def parse(Filename):
 #				print AttrList
 #				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
 			if AttrList[0] == 'ATTRIBUTE':
-				if (len(AttrList) >= 4) and VendorDefault and Vendor != {}:
-					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
-					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
-				elif (len(AttrList) >= 5) and Vendor != {}:
-					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[AttrList[4]], to_int(AttrList[2]) ))
-					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[AttrList[4]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
-				elif (len(AttrList) == 4) and VendorDefault == False:
+				if (len(AttrList) == 4) and VendorDefault == False:
+#					print "Simple case: ", AttrList, Vendor, Filename
 					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
 					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				elif (len(AttrList) == 5) and VendorDefault == False and Vendor == {}:
+#					print "Simple case with additional comment: ", AttrList, Filename
+					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
+					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				elif (len(AttrList) == 4) and VendorDefault and Vendor != {}:
+#					print "VendorDefault: ", AttrList, Vendor, Filename
+					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
+					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				elif (len(AttrList) == 5) and VendorDefault and Vendor != {}:
+#					print "VendorDefault with additional comment: ", AttrList, Vendor, Filename
+					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
+					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+				else:
+					print "Unknown: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
 
 		line = FdIn.readline()
 
