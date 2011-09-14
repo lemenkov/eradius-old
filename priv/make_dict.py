@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os
+import getopt, os, sys
 
 def make_attr_list(String):
 	SplittedStr = String.split('#')[0].split()
@@ -89,55 +89,87 @@ def parse(Filename):
 ## Main function
 ##
 
-BaseDir="./priv/dictionaries/"
+if __name__ == '__main__':
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], 'f:d:i:m:')
+	except getopt.GetoptError:
+		print('usage: b2bua.py [-f filename] [-d basedir] [-i includedir] [-m mapdir]')
+		sys.exit(1)
 
-DictList = sorted(os.listdir(BaseDir))
-AllVendors = {}
+	Filename = ""
+	BaseDir = ""
+	IncDir = "./"
+	MapDir = "./"
+	DictList = []
 
-for Filename in DictList:
-	Vendors, Vals, Attrs, Includes = parse(BaseDir + Filename)
+	for o, a in opts:
+		if o == '-f':
+			Filename = a
+			BaseDir = os.path.dirname(Filename) + "/"
+			DictList = [os.path.basename(Filename)]
+			continue
+		if o == '-d':
+			BaseDir = a + "/"
+			DictList = sorted(os.listdir(BaseDir))
+			continue
+		if o == '-i':
+			IncDir = a + "/"
+			continue
+		if o == '-m':
+			MapDir = a + "/"
+			continue
 
-	FdOut = open("./include/" + Filename.replace('.', '_') + ".hrl", 'w')
-	FdOutMap = open("./priv/" + Filename.replace('.', '_') + ".map", 'w')
+	if Filename == "" and BaseDir == "":
+		print('usage: b2bua.py [-f filename] [-d basedir] [-i includedir] [-m mapdir]')
+		print('you must specify either base directory or particular file to process')
+		sys.exit(1)
 
-	# Add guarding header to prevent multiple inclusion
-	FdOut.write("-ifndef(_%s_INCLUDED).\n" % Filename.upper().replace('.', '_'))
-	FdOut.write("-define(_%s_INCLUDED, true).\n\n" % Filename.upper().replace('.', '_'))
+	AllVendors = {}
 
-	# Print includes
-	for Include in Includes:
-		FdOut.write("-include( \"%s\" ).\n" % (Include))
+	for Filename in DictList:
+		Vendors, Vals, Attrs, Includes = parse(BaseDir + Filename)
 
-	# Print vendor
-	for Vendor in Vendors.keys():
-		if Vendor in AllVendors.keys():
-			print "Vendor %s already defined somewhere else" % Vendor
-		else:
-			FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
-			FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
+		FdOut = open(IncDir + Filename.replace('.', '_') + ".hrl", 'w')
+		FdOutMap = open(MapDir + Filename.replace('.', '_') + ".map", 'w')
 
-	AllVendors.update(Vendors)
+		# Add guarding header to prevent multiple inclusion
+		FdOut.write("-ifndef(_%s_INCLUDED).\n" % Filename.upper().replace('.', '_'))
+		FdOut.write("-define(_%s_INCLUDED, true).\n\n" % Filename.upper().replace('.', '_'))
 
-	# Print attrs
-	for Attr in Attrs.keys():
-		(Type, Val) = Attrs[Attr]
-		if isinstance(Val, tuple):
-			SubType, SubVal = Val
-			FdOut.write("-define( %s , {%s,%s} ).\n" % (Attr, SubType, SubVal))
-			FdOutMap.write("{attribute, {%s,%s}, %s, \"%s\"}.\n" % (SubType, SubVal, Type, Attr))
-		else:
-			FdOut.write("-define( %s , %s ).\n" % (Attr, Val))
-			FdOutMap.write("{attribute, %s, %s, \"%s\"}.\n" % (Val, Type, Attr))
+		# Print includes
+		for Include in Includes:
+			FdOut.write("-include( \"%s\" ).\n" % (Include))
 
-	# Print values
-	for Val in Vals.keys():
-		(Parent, Name) = Val
+		# Print vendor
+		for Vendor in Vendors.keys():
+			if Vendor in AllVendors.keys():
+				print "Vendor %s already defined somewhere else" % Vendor
+			else:
+				FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
+				FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
 
-		FdOut.write("-define( Val_%s_%s , %s ).\n" % (from_atom(Parent), from_atom(Name), Vals[Val]))
-		# FIXME
-		FdOutMap.write("{value, %s, \"%s\"}.\n" % (Vals[Val], from_atom(Name)))
+		AllVendors.update(Vendors)
 
-	FdOut.write("\n-endif.\n")
+		# Print attrs
+		for Attr in Attrs.keys():
+			(Type, Val) = Attrs[Attr]
+			if isinstance(Val, tuple):
+				SubType, SubVal = Val
+				FdOut.write("-define( %s , {%s,%s} ).\n" % (Attr, SubType, SubVal))
+				FdOutMap.write("{attribute, {%s,%s}, %s, \"%s\"}.\n" % (SubType, SubVal, Type, Attr))
+			else:
+				FdOut.write("-define( %s , %s ).\n" % (Attr, Val))
+				FdOutMap.write("{attribute, %s, %s, \"%s\"}.\n" % (Val, Type, Attr))
 
-	FdOut.close()
-	FdOutMap.close()
+		# Print values
+		for Val in Vals.keys():
+			(Parent, Name) = Val
+
+			FdOut.write("-define( Val_%s_%s , %s ).\n" % (from_atom(Parent), from_atom(Name), Vals[Val]))
+			# FIXME
+			FdOutMap.write("{value, %s, \"%s\"}.\n" % (Vals[Val], from_atom(Name)))
+
+		FdOut.write("\n-endif.\n")
+
+		FdOut.close()
+		FdOutMap.close()
