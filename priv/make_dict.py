@@ -143,6 +143,7 @@ if __name__ == '__main__':
 		# Print vendor
 		for Vendor in Vendors.keys():
 			if Vendor in AllVendors.keys():
+				# FIXME add necessary -include() ?
 				print "Vendor %s already defined somewhere else" % Vendor
 			else:
 				FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
