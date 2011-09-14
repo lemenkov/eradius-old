@@ -2,8 +2,6 @@
 
 import os
 
-BaseDir="./priv/dictionaries/"
-
 def make_attr_list(String):
 	SplittedStr = String.split('#')[0].split()
 
@@ -29,20 +27,25 @@ def to_int(ProbablyInt):
 		return int(ProbablyInt)
 
 def to_atom(Name):
-	return Name.replace('-', '_').replace('/', '_').replace('+','plus')
+	if Name[0] in "0123456789":
+		N = "'" + Name + "'"
+	else:
+		N = Name
+	return N.replace('-', '_').replace('/', '_').replace('+','plus').replace(',','_')
+
+def from_atom(Atom):
+	return Atom.replace("'", "")
 
 def parse(Filename):
 
 	Vendor = {}
+	Includes = []
+	Attrs = {}
+	Vals = {}
+
 	VendorDefault = False
 
-	FdIn = open(BaseDir + Filename)
-	FdOut = open("./include/" + Filename.replace('.', '_') + ".hrl", 'w')
-	FdOutMap = open("./priv/" + Filename.replace('.', '_') + ".map", 'w')
-
-	# Add guarding header to prevent multiple inclusion
-	FdOut.write("-ifndef(_%s_INCLUDED).\n" % Filename.upper().replace('.', '_'))
-	FdOut.write("-define(_%s_INCLUDED, true).\n\n" % Filename.upper().replace('.', '_'))
+	FdIn = open(Filename)
 
 	line = FdIn.readline()
 	while line:
@@ -50,39 +53,27 @@ def parse(Filename):
 
 		if AttrList != []:
 			if AttrList[0] == 'VENDOR' and len(AttrList) > 2:
-				Vendor[AttrList[1]] = int(AttrList[2])
-				FdOut.write("-define( %s , %s ).\n" % (to_atom(AttrList[1]), AttrList[2]))
-				FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (to_atom(AttrList[2]), AttrList[1]))
+				Vendor[to_atom(AttrList[1])] = int(AttrList[2])
 			elif AttrList[0] == 'BEGIN-VENDOR' and Vendor != {}:
 				VendorDefault = True
 			elif AttrList[0] == 'END-VENDOR':
 				VendorDefault = False
 			elif AttrList[0] == '$INCLUDE':
-				FdOut.write("-include( \"%s\" ).\n" % (AttrList[1].replace('.', '_') + ".hrl"))
+				Includes += [AttrList[1].replace('.', '_') + ".hrl"]
 			elif AttrList[0] == 'ATTRIBUTE':
 				if (len(AttrList) == 4) and VendorDefault == False:
-#					print "Simple case: ", AttrList, Vendor, Filename
-					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
-					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], to_int(AttrList[2]))
 				elif (len(AttrList) == 5) and VendorDefault == False and Vendor == {}:
-#					print "Simple case with additional comment: ", AttrList, Filename
-					FdOut.write("-define( %s , %d ).\n" % (to_atom(AttrList[1]), to_int(AttrList[2])))
-					FdOutMap.write("{attribute, %d, %s, \"%s\"}.\n" % (to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], to_int(AttrList[2]))
 				elif (len(AttrList) == 4) and VendorDefault and Vendor != {}:
-#					print "VendorDefault: ", AttrList, Vendor, Filename
-					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
-					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]],  to_int(AttrList[2])))
 				elif (len(AttrList) == 5) and VendorDefault and Vendor != {}:
-#					print "VendorDefault with additional comment: ", AttrList, Vendor, Filename
-					FdOut.write("-define( %s , {%s,%d} ).\n" % (to_atom(AttrList[1]), Vendor[Vendor.keys()[0]], to_int(AttrList[2]) ))
-					FdOutMap.write("{attribute, {%s,%d}, %s, \"%s\"}.\n" % (Vendor[Vendor.keys()[0]], to_int(AttrList[2]), AttrList[3], to_atom(AttrList[1])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]],  to_int(AttrList[2])))
 				else:
 					print "Unknown AttrList layout: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
 			elif AttrList[0] == 'VALUE':
 				if (len(AttrList) == 4):
-					FdOut.write("-define( Val_%s_%s , %d ).\n" % (to_atom(AttrList[1]), to_atom(AttrList[2]), to_int(AttrList[3]) ))
-					# FIXME
-					FdOutMap.write("{value, %d, \"%s\"}.\n" % (to_int(AttrList[3]), AttrList[2]))
+					Vals[ (to_atom(AttrList[1]), to_atom(AttrList[2])) ] = to_int(AttrList[3])
 				else:
 					print "Unknown Value layout: ", AttrList
 			else:
@@ -90,13 +81,63 @@ def parse(Filename):
 
 		line = FdIn.readline()
 
+	FdIn.close()
+
+	return Vendor, Vals, Attrs, Includes
+
+##
+## Main function
+##
+
+BaseDir="./priv/dictionaries/"
+
+DictList = sorted(os.listdir(BaseDir))
+AllVendors = {}
+
+for Filename in DictList:
+	Vendors, Vals, Attrs, Includes = parse(BaseDir + Filename)
+
+	FdOut = open("./include/" + Filename.replace('.', '_') + ".hrl", 'w')
+	FdOutMap = open("./priv/" + Filename.replace('.', '_') + ".map", 'w')
+
+	# Add guarding header to prevent multiple inclusion
+	FdOut.write("-ifndef(_%s_INCLUDED).\n" % Filename.upper().replace('.', '_'))
+	FdOut.write("-define(_%s_INCLUDED, true).\n\n" % Filename.upper().replace('.', '_'))
+
+	# Print includes
+	for Include in Includes:
+		FdOut.write("-include( \"%s\" ).\n" % (Include))
+
+	# Print vendor
+	for Vendor in Vendors.keys():
+		if Vendor in AllVendors.keys():
+			print "Vendor %s already defined somewhere else" % Vendor
+		else:
+			FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
+			FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
+
+	AllVendors.update(Vendors)
+
+	# Print attrs
+	for Attr in Attrs.keys():
+		(Type, Val) = Attrs[Attr]
+		if isinstance(Val, tuple):
+			SubType, SubVal = Val
+			FdOut.write("-define( %s , {%s,%s} ).\n" % (Attr, SubType, SubVal))
+			FdOutMap.write("{attribute, {%s,%s}, %s, \"%s\"}.\n" % (SubType, SubVal, Type, Attr))
+		else:
+			FdOut.write("-define( %s , %s ).\n" % (Attr, Val))
+			FdOutMap.write("{attribute, %s, %s, \"%s\"}.\n" % (Val, Type, Attr))
+
+	# Print values
+	for Val in Vals.keys():
+		(Parent, Name) = Val
+
+		FdOut.write("-define( Val_%s_%s , %s ).\n" % (from_atom(Parent), from_atom(Name), Vals[Val]))
+		# FIXME
+		FdOutMap.write("{value, %s, \"%s\"}.\n" % (Vals[Val], from_atom(Name)))
+
 	FdOut.write("\n-endif.\n")
 
-	FdIn.close()
 	FdOut.close()
 	FdOutMap.close()
-
-DictList = os.listdir(BaseDir)
-for i in DictList:
-	parse(i)
-
