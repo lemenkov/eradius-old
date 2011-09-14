@@ -2,7 +2,7 @@
 REBAR=./rebar
 REBAR_FLAGS ?=
 
-VSN := "0.8.1"
+VSN := "0.8.2"
 NAME := eradius
 
 ERLANG_ROOT := $(shell erl -eval 'io:format("~s", [code:root_dir()])' -s init stop -noshell)
