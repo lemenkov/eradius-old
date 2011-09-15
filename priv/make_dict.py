@@ -68,9 +68,9 @@ def parse(Filename):
 				elif (len(AttrList) == 5) and VendorDefault == False and Vendor != {}:
 					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]], to_int(AttrList[2])))
 				elif (len(AttrList) == 4) and VendorDefault and Vendor != {}:
-					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]],  to_int(AttrList[2])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]], to_int(AttrList[2])))
 				elif (len(AttrList) == 5) and VendorDefault and Vendor != {}:
-					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]],  to_int(AttrList[2])))
+					Attrs[to_atom(AttrList[1])] = (AttrList[3], (Vendor[Vendor.keys()[0]], to_int(AttrList[2])))
 				else:
 					print "Unknown AttrList layout: ", AttrList, VendorDefault, Vendor, Filename, len(AttrList)
 			elif AttrList[0] == 'VALUE':
