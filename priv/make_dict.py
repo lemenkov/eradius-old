@@ -143,11 +143,12 @@ if __name__ == '__main__':
 		# Print vendor
 		for Vendor in Vendors.keys():
 			if Vendor in AllVendors.keys():
-				# FIXME add necessary -include() ?
-				print "Vendor %s already defined somewhere else" % Vendor
-			else:
-				FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
-				FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
+				print "Vendor %s in file %s is already defined somewhere else" % (Vendor, Filename)
+
+			FdOut.write("-ifndef( %s ).\n" % (Vendor))
+			FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
+			FdOut.write("-endif.\n\n")
+			FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
 
 		AllVendors.update(Vendors)
 
