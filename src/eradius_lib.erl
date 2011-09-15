@@ -14,8 +14,6 @@
 -include("dictionary_rfc2865.hrl").
 -include("dictionary_rfc2866.hrl").
 
--define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
-
 %%====================================================================
 %% Create Attributes
 %%====================================================================

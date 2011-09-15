@@ -15,8 +15,6 @@
 -include("dictionary_rfc2866.hrl").
 -include_lib("kernel/include/inet.hrl").
 
--define(DBG(F,A), io:format("(~w:~b): " ++ F ++ "~n", [?MODULE, ?LINE] ++ A)).
-
 %%--------------------------------------------------------------------
 %% External exports
 -export([start_link/0, acc_on/1, acc_off/1,

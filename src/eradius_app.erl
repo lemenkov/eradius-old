@@ -1,7 +1,5 @@
 -module(eradius_app).
 
--include("logger.hrl").
-
 -behaviour(application).
 
 %% Application and Supervisor callbacks
@@ -11,7 +9,6 @@
 -define(MAX_TIME,      60).
 
 start(_Application, _Type) ->
-    ?DBG("Start Eradius app", []),
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 stop(_S) ->
