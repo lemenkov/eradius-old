@@ -302,7 +302,8 @@ dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
 
 enc_accreq(Id, Secret, Req) ->
     Rpdu = #rad_pdu{reqid = Id,
-		    authenticator = zero16(),
+		    %%% An empty Acc-Req Authenticator
+		    authenticator = <<0:16/?BYTE>>,
 		    cmd = Req},
     PDU = enc_pdu(Rpdu),
     patch_authenticator(PDU, l2b(Secret)).
@@ -315,13 +316,6 @@ patch_authenticator(Req,Secret) ->
 	_Urk ->
 	    exit(patch_authenticator)
     end.
-
-%%% An empty Acc-Req Authenticator
-zero16() ->
-    zero_bytes(16).
-
-zero_bytes(N) ->
-    <<0:N/?BYTE>>.
 
 l2b(L) when is_list(L)   -> list_to_binary(L);
 l2b(B) when is_binary(B) -> B.
