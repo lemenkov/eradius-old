@@ -39,9 +39,7 @@
 
 -define(WORKER_TIMEOUT, 10000).  % serious error if no answer after 10 sec
 
--define(PORT, 1812).
-
-default_port() -> ?PORT.
+default_port() -> 1812.
 
 start() ->
     application:start(eradius).
