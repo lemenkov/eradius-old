@@ -36,7 +36,7 @@ scramble(Secret, Auth, Passwd) ->
     end.
 
 xor16(Passwd, B) when size(Passwd) < 16 ->
-    xor16(pad16(Passwd), B);
+    xor16(list_to_binary([Passwd, list_to_binary(zero(16 - size(Passwd)))]), B);
 xor16(<<P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,T/binary>>,
       <<B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16>>) ->
     {<<(P1 bxor B1),
@@ -57,12 +57,8 @@ xor16(<<P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,T/binary>>,
        (P16 bxor B16)>>,
      T}.
 
-pad16(Passwd) ->
-    list_to_binary([Passwd, list_to_binary(zero(16 - size(Passwd)))]).
-
 zero(0) -> [];
 zero(N) -> [0 | zero(N-1)].
-
 
 %%====================================================================
 %% Encode/Decode Functions
