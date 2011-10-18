@@ -45,7 +45,6 @@
 
 -define(SERVER,     ?MODULE).
 -define(TABLENAME,  ?MODULE).
--define(TIMEOUT,    10).
 
 %%% ====================================================================
 %%% External interface
