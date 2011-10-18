@@ -40,7 +40,6 @@ start_link({A,B,C,D}=If, Port) ->
     Name = list_to_atom(lists:flatten(io_lib:format("rad_~p_~p_~p_~p_~p", [A,B,C,D,Port]))),
     gen_server:start_link({local, Name}, ?MODULE, {If, Port}, []).
 
-
 create_tables(Nodes) ->
     mnesia:create_table(nas_prop, [{attributes, record_info(fields, nas_prop)},
                                    {disc_copies, Nodes}]).
@@ -69,18 +68,10 @@ set_trace(IP, Port, Bool) ->
         end,
     mnesia:transaction(F).
 
-
 %%%----------------------------------------------------------------------
 %%% Callback functions from gen_server
 %%%----------------------------------------------------------------------
 
-%%----------------------------------------------------------------------
-%% Func: init/1
-%% Returns: {ok, State}          |
-%%          {ok, State, Timeout} |
-%%          ignore               |
-%%          {stop, Reason}
-%%----------------------------------------------------------------------
 init({Interface, Port}) ->
     process_flag(trap_exit, true),
     case gen_udp:open(Port, [{active, once}, {ip, Interface}, binary]) of
@@ -93,34 +84,13 @@ init({Interface, Port}) ->
 	    {stop, Reason}
     end.
 
-%%----------------------------------------------------------------------
-%% Func: handle_call/3
-%% Returns: {reply, Reply, State}          |
-%%          {reply, Reply, State, Timeout} |
-%%          {noreply, State}               |
-%%          {noreply, State, Timeout}      |
-%%          {stop, Reason, Reply, State}   | (terminate/2 is called)
-%%          {stop, Reason, State}            (terminate/2 is called)
-%%----------------------------------------------------------------------
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
 
-%%----------------------------------------------------------------------
-%% Func: handle_cast/2
-%% Returns: {noreply, State}          |
-%%          {noreply, State, Timeout} |
-%%          {stop, Reason, State}            (terminate/2 is called)
-%%----------------------------------------------------------------------
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
-%%----------------------------------------------------------------------
-%% Func: handle_info/2
-%% Returns: {noreply, State}          |
-%%          {noreply, State, Timeout} |
-%%          {stop, Reason, State}            (terminate/2 is called)
-%%----------------------------------------------------------------------
 handle_info({udp, Socket, IP, InPortNo, Packet} = Req, State) ->
     case dec_radius(IP, Packet, State#state.port) of
 	{ok, Req_id, Nas_prop} ->
@@ -173,20 +143,10 @@ handle_info({'EXIT', Pid, _Reason}, State) ->
 handle_info(_Info, State) ->
     {noreply, State}.
 
-%%----------------------------------------------------------------------
-%% Func: terminate/2
-%% Purpose: Shutdown the server
-%% Returns: any (ignored by gen_server)
-%%----------------------------------------------------------------------
 terminate(_Reason, State) ->
     gen_udp:close(State#state.socket),
     ok.
 
-%%----------------------------------------------------------------------
-%% Func: code_change/3
-%% Purpose: Convert process state when code is changed
-%% Returns: {ok, NewState}
-%%----------------------------------------------------------------------
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -223,18 +183,15 @@ allowed_ip(IP, Port) ->
 	    {ok, Nas_prop}
     end.
 
-
 error_msg(Fmt, Vals) ->
     error_logger:error_report([{application, radius},
 			       lists:flatten(io_lib:format(Fmt, Vals))]).
-
 
 dbg(on, Text, Vals) ->
     io:format("~s -- "++Text, [printable_date() | Vals]);
 dbg(#nas_prop{trace = true}, Text, Vals) ->
     io:format("~s -- "++Text, [printable_date() | Vals]);
 dbg(_, _, _) -> ok.
-
 
 %%-----------------------------------------------------------------------
 %% One of these is spawned for every radius request. This provides us

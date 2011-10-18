@@ -27,7 +27,6 @@
 	   sockopts = [],% list of extra socket options
 	   timeout}).    % timeout in seconds
 
-
 -record(rad_pdu, {
 	  reqid,
 	  authenticator,

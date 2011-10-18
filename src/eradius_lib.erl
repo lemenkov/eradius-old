@@ -295,7 +295,6 @@ dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
 	    [{Vkey,Vval} | dec_vend_attr_val(VendId, Vrest)]
     end.
 
-
 %%% ====================================================================
 %%% Radius Accounting specifics
 %%% ====================================================================

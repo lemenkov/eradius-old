@@ -7,7 +7,6 @@
 %%% Created     : 25 Sep 2003 by tobbe@bluetail.com
 %%%-------------------------------------------------------------------
 
-
 -record(attribute, {
 	  id,         % integer
 	  type,       % atom
