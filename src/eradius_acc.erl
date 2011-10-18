@@ -45,7 +45,6 @@
 
 -define(SERVER,     ?MODULE).
 -define(TABLENAME,  ?MODULE).
--define(PORT,       1813).     % standard port for Radius Accounting
 -define(TIMEOUT,    10).
 
 %%% ====================================================================
