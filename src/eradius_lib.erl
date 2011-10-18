@@ -91,13 +91,13 @@ enc_attrib(Pos, R, Def, AttrName, Type) ->
 	    enc_attrib(AttrName, V, Type)
     end.
 
-enc_attrib(AttrName, V, Type) ->
+enc_attrib({_Vendor, Id}, V, Type) ->
     Val = type_conv(V, Type),
-    Id = strip_vendor(AttrName),
-    <<Id, (size(Val) + 2):8, Val/binary>>.
+    <<Id, (size(Val) + 2):8, Val/binary>>;
 
-strip_vendor({_Vendor, Id}) -> Id;
-strip_vendor(Id)            -> Id.
+enc_attrib(Id, V, Type) ->
+    Val = type_conv(V, Type),
+    <<Id, (size(Val) + 2):8, Val/binary>>.
 
 type_conv(V, binary)         -> V;
 type_conv(V, integer)        -> <<V:32>>;
