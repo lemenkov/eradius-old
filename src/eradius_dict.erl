@@ -81,8 +81,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%% --------------------------------------------------------------------
 
 load_table(Table) ->
-    Dir = priv_dir(),
-    MapFile = Dir ++ "/" ++ Table ++ ".map",
+    BaseDir = filename:dirname(filename:dirname(code:which(?MODULE))),
+    MapFile = BaseDir ++ "/priv/" ++ Table ++ ".map",
     case file:consult(MapFile) of
 	{ok, Res} ->
 	    lists:foreach(fun(R) -> ets:insert(?TABLENAME, R) end, Res),
@@ -90,8 +90,3 @@ load_table(Table) ->
 	_Error ->
 	    {error, load_table}
     end.
-
-priv_dir() ->
-    P = code:which(?MODULE),
-    [_,_|R] = lists:reverse(string:tokens(P,"/")),
-    lists:foldl(fun(X,Acc) -> Acc ++ [$/|X] end, "", lists:reverse(R)) ++ "/priv".
