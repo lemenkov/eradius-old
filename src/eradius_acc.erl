@@ -192,12 +192,6 @@ create_ets_table() ->
     ets:new(?TABLENAME, [named_table, public]),
     ets:insert(?TABLENAME, {id_counter, 0}).
 
-get_id() ->
-    bump_id().
-
-bump_id() ->
-    ets:update_counter(?TABLENAME, id_counter, 1).
-
 handle_call({set_radacct, R}, _From, State) when is_record(R, radacct) ->
     {reply, ok, State#s{r = R}}.
 
@@ -268,7 +262,7 @@ do_punch([], _Timeout, _Req) ->
     %% FIXME some nice syslog message somewhere perhaps ?
     false;
 do_punch([[Ip,Port,Shared] | Rest], Timeout, Req) ->
-    Id = get_id(),
+    Id = ets:update_counter(?TABLENAME, id_counter, 1),
     PDU = eradius_lib:enc_accreq(Id, Shared, Req),
     case send_recv_msg(Ip, Port, Timeout, PDU) of
 	timeout ->

@@ -99,9 +99,6 @@ create_ets_table() ->
     ets:new(?TABLENAME, [named_table, public]),
     ets:insert(?TABLENAME, {id_counter, 0}).
 
-bump_id() ->
-    ets:update_counter(?TABLENAME, id_counter, 1).
-
 handle_call({auth, E, User, Passwd, CState}, From, State) ->
     start_worker(From, E, User, Passwd, CState),
     {noreply, State}.
@@ -131,9 +128,6 @@ start_worker(From, E, User, Passwd, CState) ->
     Args = [From, E, User, Passwd, CState],
     proc_lib:spawn(?MODULE, worker, Args).
 
-get_id() ->
-    bump_id().
-
 worker(From, E, User, Passwd, CState) ->
     process_flag(trap_exit, true),
     Servers = E#eradius.servers,
@@ -152,7 +146,7 @@ wloop(E, User, Passwd, _, {{Ip,Port,Secret}, State}) ->
     %% Make sure the challenge reply goes to the same Radius server.
     wloop(E, User, Passwd, [[Ip,Port,Secret]], State);
 wloop(E, User0, Passwd0, [[Ip,Port,Secret0]|Srvs], State) ->
-    Id = get_id(),
+    Id = ets:update_counter(?TABLENAME, id_counter, 1),
     Auth = eradius_lib:mk_authenticator(),
     Secret = list_to_binary(Secret0),
     Passwd = list_to_binary(Passwd0),
