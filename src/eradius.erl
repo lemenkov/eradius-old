@@ -37,8 +37,6 @@
 -define(SERVER    , ?MODULE).
 -define(TABLENAME , ?MODULE).
 
--define(WORKER_TIMEOUT, 10000).  % serious error if no answer after 10 sec
-
 default_port() -> 1812.
 
 start() ->
