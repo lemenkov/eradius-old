@@ -92,9 +92,6 @@ load_table(Table) ->
     end.
 
 priv_dir() ->
-    dir(?MODULE) ++ "/priv".
-
-dir(Mod) ->
-    P = code:which(Mod),
+    P = code:which(?MODULE),
     [_,_|R] = lists:reverse(string:tokens(P,"/")),
-    lists:foldl(fun(X,Acc) -> Acc ++ [$/|X] end, "", lists:reverse(R)).
+    lists:foldl(fun(X,Acc) -> Acc ++ [$/|X] end, "", lists:reverse(R)) ++ "/priv".
