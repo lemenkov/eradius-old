@@ -185,12 +185,9 @@ acc_update(Req) when is_record(Req,rad_accreq) ->
 %%====================================================================
 
 init([]) ->
-    create_ets_table(),
-    {ok, #s{}}.
-
-create_ets_table() ->
     ets:new(?TABLENAME, [named_table, public]),
-    ets:insert(?TABLENAME, {id_counter, 0}).
+    ets:insert(?TABLENAME, {id_counter, 0}),
+    {ok, #s{}}.
 
 handle_call({set_radacct, R}, _From, State) when is_record(R, radacct) ->
     {reply, ok, State#s{r = R}}.

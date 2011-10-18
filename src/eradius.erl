@@ -92,12 +92,9 @@ load_tables(Tables) ->
 %%--------------------------------------------------------------------
 init([]) ->
     process_flag(trap_exit, true),
-    create_ets_table(),
-    {ok, #state{}}.
-
-create_ets_table() ->
     ets:new(?TABLENAME, [named_table, public]),
-    ets:insert(?TABLENAME, {id_counter, 0}).
+    ets:insert(?TABLENAME, {id_counter, 0}),
+    {ok, #state{}}.
 
 handle_call({auth, E, User, Passwd, CState}, From, State) ->
     start_worker(From, E, User, Passwd, CState),

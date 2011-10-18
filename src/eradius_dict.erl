@@ -53,11 +53,8 @@ load_tables(Tables) ->
 
 init([]) ->
     process_flag(trap_exit, true),
-    create_table(),
+    ets:new(?TABLENAME, [named_table, {keypos, 2}, public]),
     {ok, #state{}}.
-
-create_table() ->
-    ets:new(?TABLENAME, [named_table, {keypos, 2}, public]).
 
 handle_call({load_tables, Tables}, _From, State) ->
     Res = (catch lists:foreach(fun(Tab) -> load_table(Tab) end, Tables)),
@@ -101,4 +98,3 @@ dir(Mod) ->
     P = code:which(Mod),
     [_,_|R] = lists:reverse(string:tokens(P,"/")),
     lists:foldl(fun(X,Acc) -> Acc ++ [$/|X] end, "", lists:reverse(R)).
-
