@@ -65,7 +65,7 @@ start_link() ->
 %%-----------------------------------------------------------------
 
 auth(E) ->
-    auth(E, E#eradius.user, E#eradius.passwd).
+    auth(E, E#eradius.user, E#eradius.passwd, E#eradius.state).
 
 auth(E, User, Passwd) ->
     auth(E, User, Passwd, E#eradius.state).
