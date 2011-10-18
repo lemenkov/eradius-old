@@ -188,17 +188,14 @@ wloop(E, User, _Passwd, [], _State) ->
 send_recv_msg(Ip, Port, Req, E) ->
     {ok, S} = gen_udp:open(0, [binary]),
     gen_udp:send(S, Ip, Port, Req),
-    Resp = recv_wait(S, E#eradius.timeout),
-    gen_udp:close(S),
-    decode_response(Resp, E).
-
-recv_wait(S, Timeout) ->
-    receive
+    Resp = receive
 	{udp, S, _IP, _Port, Packet} ->
 	    eradius_lib:dec_packet(Packet)
-    after Timeout ->
+    after E#eradius.timeout ->
 	    timeout
-    end.
+    end,
+    gen_udp:close(S),
+    decode_response(Resp, E).
 
 decode_response(Resp, _E) when is_record(Resp, rad_pdu) ->
     Resp#rad_pdu.cmd;

@@ -276,17 +276,14 @@ do_punch([[Ip,Port,Shared] | Rest], Timeout, Req) ->
 send_recv_msg(Ip, Port, Timeout, Req) ->
     {ok, S} = gen_udp:open(0, [binary]),
     gen_udp:send(S, Ip, Port, Req),
-    Resp = recv_wait(S, Timeout),
-    gen_udp:close(S),
-    Resp.
-
-recv_wait(S, Timeout) ->
-    receive
+    Resp = receive
 	{udp, S, _IP, _Port, Packet} ->
 	    eradius_lib:dec_packet(Packet)
     after Timeout ->
 	    timeout
-    end.
+    end,
+    gen_udp:close(S),
+    Resp.
 
 %% Login = Logout = {MSec, Sec, uSec} | is_integer()
 %% (In the second form it is erlang:now() in seconds)
