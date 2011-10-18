@@ -156,7 +156,16 @@ wloop(E, User0, Passwd0, [[Ip,Port,Secret0]|Srvs], State) ->
 	      [binary_to_list(User), {Ip, Port}]),
     Req = eradius_lib:enc_pdu(Pdu),
     _StatKey = [E, Ip, Port],
-    case send_recv_msg(Ip, Port, Req, E) of
+    {ok, S} = gen_udp:open(0, [binary]),
+    gen_udp:send(S, Ip, Port, Req),
+    Resp = receive
+	{udp, S, _IP, _Port, Packet} ->
+	    eradius_lib:dec_packet(Packet)
+    after E#eradius.timeout ->
+	    timeout
+    end,
+    gen_udp:close(S),
+    case decode_response(Resp, E) of
 	timeout ->
 	    ?STATFUN_TIMEDOUT(E, Ip, Port),
 	    ?TRACEFUN(E,"RADIUS request for ~p timed out", [{Ip, Port}]),
@@ -184,18 +193,6 @@ wloop(E, User0, Passwd0, [[Ip,Port,Secret0]|Srvs], State) ->
 wloop(E, User, _Passwd, [], _State) ->
     ?TRACEFUN(E,"no more RADIUS servers to try for ~s",[binary_to_list(User)]),
     {reject, ?AL_Backend_Unreachable}.
-
-send_recv_msg(Ip, Port, Req, E) ->
-    {ok, S} = gen_udp:open(0, [binary]),
-    gen_udp:send(S, Ip, Port, Req),
-    Resp = receive
-	{udp, S, _IP, _Port, Packet} ->
-	    eradius_lib:dec_packet(Packet)
-    after E#eradius.timeout ->
-	    timeout
-    end,
-    gen_udp:close(S),
-    decode_response(Resp, E).
 
 decode_response(Resp, _E) when is_record(Resp, rad_pdu) ->
     Resp#rad_pdu.cmd;
