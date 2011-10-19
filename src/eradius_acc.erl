@@ -50,6 +50,27 @@
 %%% External interface
 %%% ====================================================================
 
+%%-----------------------------------------------------------------
+%% Func: auth(User, Passwd, AuthSpec)
+%% Types:
+%% Purpose:
+%%-----------------------------------------------------------------
+
+acc_on(Req) when is_record(Req,rad_accreq) ->
+    gen_server:cast(?SERVER, {acc_on, Req}).
+
+acc_off(Req) when is_record(Req,rad_accreq) ->
+    gen_server:cast(?SERVER, {acc_off, Req}).
+
+acc_start(Req) when is_record(Req,rad_accreq) ->
+    gen_server:cast(?SERVER, {acc_start, Req}).
+
+acc_stop(Req) when is_record(Req,rad_accreq) ->
+    gen_server:cast(?SERVER, {acc_stop, Req}).
+
+acc_update(Req) when is_record(Req,rad_accreq) ->
+    gen_server:cast(?SERVER, {acc_update, Req}).
+
 %%% Create ADT
 new() -> #rad_accreq{}.
 
@@ -158,28 +179,6 @@ start_link() ->
 start() ->
     gen_server:start({local, ?SERVER}, ?MODULE, [], []).
 
-%%-----------------------------------------------------------------
-%% Func: auth(User, Passwd, AuthSpec)
-%% Types:
-%% Purpose:
-%%-----------------------------------------------------------------
-
-acc_on(Req) when is_record(Req,rad_accreq) ->
-    gen_server:cast(?SERVER, {acc_on, Req}).
-
-acc_off(Req) when is_record(Req,rad_accreq) ->
-    gen_server:cast(?SERVER, {acc_off, Req}).
-
-acc_start(Req) when is_record(Req,rad_accreq) ->
-    gen_server:cast(?SERVER, {acc_start, Req}).
-
-acc_stop(Req) when is_record(Req,rad_accreq) ->
-    gen_server:cast(?SERVER, {acc_stop, Req}).
-
-acc_update(Req) when is_record(Req,rad_accreq) ->
-    gen_server:cast(?SERVER, {acc_update, Req}).
-
-
 %%====================================================================
 %% Server functions
 %%====================================================================
@@ -212,6 +211,19 @@ handle_cast({acc_update, Req}, State) ->
     punch_acc(Req, State, ?Val_Acct_Status_Type_Interim_Update),
     {noreply, State}.
 
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+terminate(_Reason, _State) ->
+    ok.
+
+code_change(_OldVsn, State, _Extra) ->
+    {ok, State}.
+
+%%% -------------------------------------------------------------------
+%%% Internal functions
+%%% -------------------------------------------------------------------
+
 punch_acc(Req, State, Stype) ->
     case get_servers(Req,State) of
 	{Srvs,Timeout} ->
@@ -238,19 +250,6 @@ get_servers(Req,State) ->
 	{Srvs,_} ->
 	    {Srvs, Req#rad_accreq.timeout}
     end.
-
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-terminate(_Reason, _State) ->
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
-
-%%% -------------------------------------------------------------------
-%%% Internal functions
-%%% -------------------------------------------------------------------
 
 punch(Srvs, Timeout, Req) ->
     spawn(fun() -> do_punch(Srvs, Timeout, Req) end).
