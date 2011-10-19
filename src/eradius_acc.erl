@@ -296,6 +296,7 @@ nas_ip_address() ->
     {ok, #hostent{h_addr_list = [Ip | _]}} = inet:gethostbyname(Host),
     Ip.
 
+n2h("@nohost") -> "localhost";
 n2h([$@ | Host]) -> Host;
 n2h([_H | T])    -> n2h(T);
-n2h([])          -> [].
+n2h([])          -> "localhost".
