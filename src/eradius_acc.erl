@@ -34,10 +34,6 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--ifdef(debug).
--export([test/0,test/1,test_stop/0]).
--endif.
-
 %% The State record
 -record(s, {
 	  r         % #radacct{} record
