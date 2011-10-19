@@ -257,21 +257,8 @@ do_punch([], _Timeout, _Req) ->
 do_punch([[Ip,Port,Shared] | Rest], Timeout, Req) ->
     Id = ets:update_counter(?TABLENAME, id_counter, 1),
     PDU = eradius_lib:enc_accreq(Id, Shared, Req),
-    case send_recv_msg(Ip, Port, Timeout, PDU) of
-	timeout ->
-	    %% NB: We could implement a re-send strategy here
-	    %% along the lines of what the RFC proposes.
-	    do_punch(Rest, Timeout, Req);
-	Resp when is_record(Resp, rad_pdu) ->
-	    %% Not really necessary...
-	    if is_record(Resp#rad_pdu.cmd, rad_accresp) -> true;
-	       true                                  -> false
-	    end
-    end.
-
-send_recv_msg(Ip, Port, Timeout, Req) ->
     {ok, S} = gen_udp:open(0, [binary]),
-    gen_udp:send(S, Ip, Port, Req),
+    gen_udp:send(S, Ip, Port, PDU),
     Resp = receive
 	{udp, S, _IP, _Port, Packet} ->
 	    eradius_lib:dec_packet(Packet)
@@ -279,7 +266,17 @@ send_recv_msg(Ip, Port, Timeout, Req) ->
 	    timeout
     end,
     gen_udp:close(S),
-    Resp.
+    case Resp of
+	timeout ->
+	    %% NB: We could implement a re-send strategy here
+	    %% along the lines of what the RFC proposes.
+	    do_punch(Rest, Timeout, Req);
+	_ when is_record(Resp, rad_pdu) ->
+	    %% Not really necessary...
+	    if is_record(Resp#rad_pdu.cmd, rad_accresp) -> true;
+	       true                                  -> false
+	    end
+    end.
 
 to_now(Now = {MSec, Sec, USec}) when is_integer(MSec),
 				     is_integer(Sec), is_integer(USec) ->
