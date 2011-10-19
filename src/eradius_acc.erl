@@ -292,18 +292,10 @@ any2bin(L) when is_list(L)    -> list_to_binary(L);
 any2bin(B) when is_binary(B)  -> B.
 
 nas_ip_address() ->
-    node2ip(node()).
-
-node2ip(Node) ->
-    host2ip(node2host(Node)).
-
-node2host(Node) ->
-    n2h(atom_to_list(Node)).
+    Host = n2h(atom_to_list(node())),
+    {ok, #hostent{h_addr_list = [Ip | _]}} = inet:gethostbyname(Host),
+    Ip.
 
 n2h([$@ | Host]) -> Host;
 n2h([_H | T])    -> n2h(T);
 n2h([])          -> [].
-
-host2ip(Host) ->
-    {ok, #hostent{h_addr_list = [Ip | _]}} = inet:gethostbyname(Host),
-    Ip.
