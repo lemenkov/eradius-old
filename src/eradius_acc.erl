@@ -227,8 +227,8 @@ code_change(_OldVsn, State, _Extra) ->
 punch_acc(Req, State, Stype) ->
     case get_servers(Req,State) of
 	{Srvs,Timeout} ->
-	    punch(Srvs, Timeout,
-		 Req#rad_accreq{status_type = Stype});
+	    spawn(fun() -> do_punch(Srvs, Timeout,
+		 Req#rad_accreq{status_type = Stype}) end);
 	_ ->
 	    false
     end.
@@ -250,9 +250,6 @@ get_servers(Req,State) ->
 	{Srvs,_} ->
 	    {Srvs, Req#rad_accreq.timeout}
     end.
-
-punch(Srvs, Timeout, Req) ->
-    spawn(fun() -> do_punch(Srvs, Timeout, Req) end).
 
 do_punch([], _Timeout, _Req) ->
     %% FIXME some nice syslog message somewhere perhaps ?
