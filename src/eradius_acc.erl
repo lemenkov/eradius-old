@@ -17,13 +17,12 @@
 
 %%--------------------------------------------------------------------
 %% External exports
--export([start_link/0, acc_on/1, acc_off/1,
-	 acc_start/1, acc_stop/1,
-	 start/0,
+-export([start_link/0, start/0,
+	 acc_on/1, acc_off/1, acc_start/1, acc_stop/1, acc_update/1,
 	 set_user/2, set_nas_ip_address/1, set_nas_ip_address/2,
 	 set_sockopts/2,
 	 set_login_time/1, set_logout_time/1, set_session_id/2, new/0,
-	 set_radacct/1, set_attr/3, set_vend_attr/2, set_vend_attr/3, acc_update/1,
+	 set_radacct/1, set_attr/3, set_vend_attr/2, set_vend_attr/3,
 	 set_servers/2, set_timeout/2, set_login_time/2,  set_vendor_id/2,
 	 set_logout_time/2, set_tc_ureq/1,
 	 set_tc_itimeout/1,set_tc_stimeout/1,
