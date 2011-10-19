@@ -128,7 +128,12 @@ set_logout_time(R) ->
      set_logout_time(R, erlang:now()).
 
 set_logout_time(R, Logout) when is_record(R, rad_accreq) ->
-    SessTime = compute_session_time(R#rad_accreq.login_time, Logout),
+    %% Login0 = Logout0 = {MSec, Sec, uSec} | is_integer()
+    %% (In the second form it is erlang:now() in seconds)
+    Login0 = to_now(R#rad_accreq.login_time),
+    Logout0 = to_now(Logout),
+    SessTime = calendar:datetime_to_gregorian_seconds(calendar:now_to_local_time(Logout0)) -
+	calendar:datetime_to_gregorian_seconds(calendar:now_to_local_time(Login0)),
     R#rad_accreq{session_time = SessTime,
 		 logout_time = Logout}.
 
@@ -280,14 +285,6 @@ send_recv_msg(Ip, Port, Timeout, Req) ->
     end,
     gen_udp:close(S),
     Resp.
-
-%% Login = Logout = {MSec, Sec, uSec} | is_integer()
-%% (In the second form it is erlang:now() in seconds)
-compute_session_time(Login0, Logout0) ->
-    Login = to_now(Login0),
-    Logout = to_now(Logout0),
-    calendar:datetime_to_gregorian_seconds(calendar:now_to_local_time(Logout)) -
-	calendar:datetime_to_gregorian_seconds(calendar:now_to_local_time(Login)).
 
 to_now(Now = {MSec, Sec, USec}) when is_integer(MSec),
 				     is_integer(Sec), is_integer(USec) ->
