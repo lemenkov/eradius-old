@@ -19,7 +19,7 @@
 %% External exports
 -export([start_link/0, acc_on/1, acc_off/1,
 	 acc_start/1, acc_stop/1,
-	 validate_servers/1, start/0,
+	 start/0,
 	 set_user/2, set_nas_ip_address/1, set_nas_ip_address/2,
 	 set_sockopts/2,
 	 set_login_time/1, set_logout_time/1, set_session_id/2, new/0,
@@ -295,14 +295,6 @@ to_now(Now) when is_integer(Now) ->
 any2bin(I) when is_integer(I) -> list_to_binary(integer_to_list(I));
 any2bin(L) when is_list(L)    -> list_to_binary(L);
 any2bin(B) when is_binary(B)  -> B.
-
-%%%
-%%% Registry validation and typecheck stuff
-%%%
-
-validate_servers(_X) ->
-    %% FIXME
-    true.
 
 nas_ip_address() ->
     node2ip(node()).
