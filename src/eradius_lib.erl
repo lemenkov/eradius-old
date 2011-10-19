@@ -36,7 +36,7 @@ scramble(Secret, Auth, Passwd) ->
     end.
 
 xor16(Passwd, B) when size(Passwd) < 16 ->
-    xor16(pad16(Passwd), B);
+    xor16(list_to_binary([Passwd, list_to_binary(zero(16 - size(Passwd)))]), B);
 xor16(<<P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,T/binary>>,
       <<B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,B11,B12,B13,B14,B15,B16>>) ->
     {<<(P1 bxor B1),
@@ -57,12 +57,8 @@ xor16(<<P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,T/binary>>,
        (P16 bxor B16)>>,
      T}.
 
-pad16(Passwd) ->
-    list_to_binary([Passwd, list_to_binary(zero(16 - size(Passwd)))]).
-
 zero(0) -> [];
 zero(N) -> [0 | zero(N-1)].
-
 
 %%====================================================================
 %% Encode/Decode Functions
@@ -91,13 +87,13 @@ enc_attrib(Pos, R, Def, AttrName, Type) ->
 	    enc_attrib(AttrName, V, Type)
     end.
 
-enc_attrib(AttrName, V, Type) ->
+enc_attrib({_Vendor, Id}, V, Type) ->
     Val = type_conv(V, Type),
-    Id = strip_vendor(AttrName),
-    <<Id, (size(Val) + 2):8, Val/binary>>.
+    <<Id, (size(Val) + 2):8, Val/binary>>;
 
-strip_vendor({_Vendor, Id}) -> Id;
-strip_vendor(Id)            -> Id.
+enc_attrib(Id, V, Type) ->
+    Val = type_conv(V, Type),
+    <<Id, (size(Val) + 2):8, Val/binary>>.
 
 type_conv(V, binary)         -> V;
 type_conv(V, integer)        -> <<V:32>>;
@@ -295,14 +291,14 @@ dec_vend_attr_val(VendId, <<Vtype:8, Vlen:8, Vbin/binary>>) ->
 	    [{Vkey,Vval} | dec_vend_attr_val(VendId, Vrest)]
     end.
 
-
 %%% ====================================================================
 %%% Radius Accounting specifics
 %%% ====================================================================
 
 enc_accreq(Id, Secret, Req) ->
     Rpdu = #rad_pdu{reqid = Id,
-		    authenticator = zero16(),
+		    %%% An empty Acc-Req Authenticator
+		    authenticator = <<0:16/?BYTE>>,
 		    cmd = Req},
     PDU = enc_pdu(Rpdu),
     patch_authenticator(PDU, l2b(Secret)).
@@ -315,13 +311,6 @@ patch_authenticator(Req,Secret) ->
 	_Urk ->
 	    exit(patch_authenticator)
     end.
-
-%%% An empty Acc-Req Authenticator
-zero16() ->
-    zero_bytes(16).
-
-zero_bytes(N) ->
-    <<0:N/?BYTE>>.
 
 l2b(L) when is_list(L)   -> list_to_binary(L);
 l2b(B) when is_binary(B) -> B.
