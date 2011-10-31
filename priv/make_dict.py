@@ -150,7 +150,7 @@ if __name__ == '__main__':
 			FdOut.write("-ifndef( %s ).\n" % (Vendor))
 			FdOut.write("-define( %s , %s ).\n" % (Vendor, Vendors[Vendor]))
 			FdOut.write("-endif.\n\n")
-			FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendor, Vendors[Vendor]))
+			FdOutMap.write("{vendor, %s, \"%s\"}.\n" % (Vendors[Vendor], Vendor))
 
 		AllVendors.update(Vendors)
 
