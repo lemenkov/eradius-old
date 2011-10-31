@@ -2,7 +2,7 @@
 REBAR=./rebar
 REBAR_FLAGS ?=
 
-VSN := "0.8.4"
+VSN := "0.8.5"
 NAME := eradius
 
 ERLANG_ROOT := $(shell erl -eval 'io:format("~s", [code:root_dir()])' -s init stop -noshell)
@@ -20,7 +20,8 @@ all: compile
 compile:
 	VSN=$(VSN) $(REBAR) compile $(REBAR_FLAGS)
 
-test:
+test: all
+	@rm -rf .eunit
 	$(REBAR) eunit $(REBAR_FLAGS)
 
 install: all
