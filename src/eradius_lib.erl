@@ -117,7 +117,8 @@ type_conv(V, integer64) -> throw ({error, unsupported});
 % 4 octets in network byte order
 type_conv(V = {A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
 % 16 octets in network byte order
-type_conv(V, ipv6addr) -> throw ({error, unsupported});
+type_conv(V = {A,B,C,D,E,F,G,H}, ipv6addr) ->
+	<<A:16, B:16, C:16, D:16, E:16, F:16, G:16, H:16>>;
 % 18 octets in network byte order
 type_conv(V, ipv6prefix) -> throw ({error, unsupported});
 % raw octets, printed and input as hex strings. e.g.: 0x123456789abcdef
@@ -291,6 +292,8 @@ dec_attr_val(A, I0) when A#attribute.type == integer ->
     end;
 dec_attr_val(A, <<B,C,D,E>>) when A#attribute.type == ipaddr ->
     [{A, {B,C,D,E}}];
+dec_attr_val(A, Bin = <<I0:16,I1:16,I2:16,I3:16,I4:16,I5:16,I6:16,I7:16>>) when A#attribute.type == ipv6addr ->
+    [{A, {I0,I1,I2,I3,I4,I5,I6,I7}}];
 dec_attr_val(A, Bin) when A#attribute.type == octets ->
     case A#attribute.id of
 	?Vendor_Specific ->
