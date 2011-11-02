@@ -140,7 +140,8 @@ type_conv(V, string) when is_binary(V) -> V;
 % printable, generally UTF-8 encoded (subset of 'string')
 type_conv(V, text) -> throw ({error, unsupported});
 % type-length-value (see dictionary.wimax)
-type_conv(V, tlv) -> throw ({error, unsupported}).
+type_conv(V, tlv) -> throw ({error, unsupported});
+type_conv(V, _) -> throw ({error, unsupported}).
 
 
 enc_cmd(R) when is_record(R, rad_request) ->
