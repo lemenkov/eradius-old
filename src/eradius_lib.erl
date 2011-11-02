@@ -95,21 +95,15 @@ enc_attrib(Id, V, Type) ->
     Val = type_conv(V, Type),
     <<Id, (size(Val) + 2):8, Val/binary>>.
 
-type_conv(V, binary)         -> V;
-type_conv(V, integer)        -> <<V:32>>;
+type_conv(V, binary) -> V;
+type_conv(V, integer) -> <<V:32>>;
 type_conv({A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
-type_conv(V, string) when
-      is_list(V) -> iolist_to_binary(V);
-type_conv(V, string) when
-      is_binary(V) -> V;
-type_conv(V, octets) when
-      is_list(V) -> iolist_to_binary(V);
-type_conv(V, octets) when
-      is_binary(V) -> V;
-type_conv(V, date) when
-      is_list(V) -> iolist_to_binary(V);
-type_conv(V, date) when
-      is_binary(V) -> V.
+type_conv(V, string) when is_list(V) -> iolist_to_binary(V);
+type_conv(V, string) when is_binary(V) -> V;
+type_conv(V, octets) when is_list(V) -> iolist_to_binary(V);
+type_conv(V, octets) when is_binary(V) -> V;
+type_conv(V, date) when is_list(V) -> iolist_to_binary(V);
+type_conv(V, date) when is_binary(V) -> V.
 
 
 enc_cmd(R) when is_record(R, rad_request) ->
