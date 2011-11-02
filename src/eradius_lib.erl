@@ -95,7 +95,6 @@ enc_attrib(Id, V, Type) ->
     Val = type_conv(V, Type),
     <<Id, (size(Val) + 2):8, Val/binary>>.
 
-type_conv(V, binary) -> V;
 type_conv(V, integer) -> <<V:32>>;
 type_conv({A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
 type_conv(V, string) when is_list(V) -> iolist_to_binary(V);
@@ -109,15 +108,15 @@ type_conv(V, date) when is_binary(V) -> V.
 enc_cmd(R) when is_record(R, rad_request) ->
     Def = #rad_request{},
     {?Val_Packet_Type_Access_Request,
-     [enc_attrib(#rad_request.user,      R, Def, ?User_Name,       binary),
-      enc_attrib(#rad_request.passwd,    R, Def, ?User_Password,     binary),
+     [enc_attrib(#rad_request.user,      R, Def, ?User_Name,       string),
+      enc_attrib(#rad_request.passwd,    R, Def, ?User_Password,     string),
       enc_attrib(#rad_request.nas_ip,    R, Def, ?NAS_IP_Address,  ipaddr),
-      enc_attrib(#rad_request.state,     R, Def, ?State,           binary)
+      enc_attrib(#rad_request.state,     R, Def, ?State,           octets)
      ]};
 enc_cmd(R) when is_record(R, rad_accept) ->
     Def = #rad_accept{},
     {?Val_Packet_Type_Access_Accept,
-     [enc_attrib(#rad_accept.user,        R, Def, ?User_Name,       binary),
+     [enc_attrib(#rad_accept.user,        R, Def, ?User_Name,       string),
       lists:map(fun(RM) ->
 			<<?Vendor_Specific:8, (size(RM)+2):8, RM/binary>>
 		end,
@@ -126,7 +125,7 @@ enc_cmd(R) when is_record(R, rad_accept) ->
 enc_cmd(R) when is_record(R, rad_challenge) ->
     Def = #rad_challenge{},
     {?Val_Packet_Type_Access_Challenge,
-     [enc_attrib(#rad_challenge.state,   R, Def, ?State,           binary),
+     [enc_attrib(#rad_challenge.state,   R, Def, ?State,           octets),
       lists:map(fun(RM) -> <<?Reply_Message:8, (size(RM)+2):8, RM/binary>> end,
 		R#rad_challenge.reply_msgs)]
     };
@@ -140,9 +139,9 @@ enc_cmd(R) when is_record(R, rad_accreq) ->
     {?Val_Packet_Type_Accounting_Request,
      [enc_attrib(#rad_accreq.status_type, R, Def, ?Acct_Status_Type,     integer),
       enc_attrib(#rad_accreq.session_time,R, Def, ?Acct_Session_Time,    integer),
-      enc_attrib(#rad_accreq.session_id,  R, Def, ?Acct_Session_Id,      binary),
+      enc_attrib(#rad_accreq.session_id,  R, Def, ?Acct_Session_Id,      string),
       enc_attrib(#rad_accreq.term_cause,  R, Def, ?Acct_Terminate_Cause, integer),
-      enc_attrib(#rad_accreq.user,        R, Def, ?User_Name,       binary),
+      enc_attrib(#rad_accreq.user,        R, Def, ?User_Name,       string),
       enc_attrib(#rad_accreq.nas_ip,      R, Def, ?NAS_IP_Address,  ipaddr),
       enc_std_attrs(R),
       enc_vendor_attrs(R)
