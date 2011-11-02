@@ -8,6 +8,10 @@
 -export([enc_pdu/1, enc_reply_pdu/2, dec_packet/1, enc_accreq/3]).
 -export([mk_authenticator/0, mk_password/3]).
 
+% Quick hack for EUnit
+-export([type_conv/2]).
+-export([dec_attr_val/2]).
+
 -include("eradius_lib.hrl").
 -include("eradius_dict.hrl").
 -include("dictionary_freeradius_internal.hrl").
