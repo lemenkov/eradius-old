@@ -95,14 +95,45 @@ enc_attrib(Id, V, Type) ->
     Val = type_conv(V, Type),
     <<Id, (size(Val) + 2):8, Val/binary>>.
 
+% Ascend's binary filter format.
+type_conv(V, abinary) -> throw ({error, unsupported});
+% 8 bit unsigned integer
+type_conv(V, byte) -> throw ({error, unsupported});
+% if length 4, is the same as the "ipaddr" type. if length 16, is the same as "ipv6addr" type.
+type_conv(V, comboip) -> throw ({error, unsupported});
+% 32 bit value in big endian order - seconds since 00:00:00 GMT, Jan. 1, 1970
+type_conv(V, date) when is_list(V) -> iolist_to_binary(V);
+type_conv(V, date) when is_binary(V) -> V;
+% 6 octets of hh:hh:hh:hh:hh:hh where 'h' is hex digits, upper or lowercase.
+type_conv(V, ether) -> throw ({error, unsupported});
+type_conv(V, evs) -> throw ({error, unsupported});
+type_conv(V, extended) -> throw ({error, unsupported});
+type_conv(V, extendedflags) -> throw ({error, unsupported});
+% 8 octets in network byte order
+type_conv(V, ifid) -> throw ({error, unsupported});
+% 32 bit value in big endian order (high byte first)
 type_conv(V, integer) -> <<V:32>>;
-type_conv({A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
-type_conv(V, string) when is_list(V) -> iolist_to_binary(V);
-type_conv(V, string) when is_binary(V) -> V;
+type_conv(V, integer64) -> throw ({error, unsupported});
+% 4 octets in network byte order
+type_conv(V = {A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
+% 16 octets in network byte order
+type_conv(V, ipv6addr) -> throw ({error, unsupported});
+% 18 octets in network byte order
+type_conv(V, ipv6prefix) -> throw ({error, unsupported});
+% raw octets, printed and input as hex strings. e.g.: 0x123456789abcdef
 type_conv(V, octets) when is_list(V) -> iolist_to_binary(V);
 type_conv(V, octets) when is_binary(V) -> V;
-type_conv(V, date) when is_list(V) -> iolist_to_binary(V);
-type_conv(V, date) when is_binary(V) -> V.
+% 16-bit unsigned integer
+type_conv(V, short) -> throw ({error, unsupported});
+% 4-octet signed integer in network byte order
+type_conv(V, signed) -> throw ({error, unsupported});
+% 0-253 octets
+type_conv(V, string) when is_list(V) -> iolist_to_binary(V);
+type_conv(V, string) when is_binary(V) -> V;
+% printable, generally UTF-8 encoded (subset of 'string')
+type_conv(V, text) -> throw ({error, unsupported});
+% type-length-value (see dictionary.wimax)
+type_conv(V, tlv) -> throw ({error, unsupported}).
 
 
 enc_cmd(R) when is_record(R, rad_request) ->
