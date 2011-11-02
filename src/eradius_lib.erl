@@ -113,7 +113,8 @@ type_conv(V, extendedflags) -> throw ({error, unsupported});
 type_conv(V, ifid) -> throw ({error, unsupported});
 % 32 bit value in big endian order (high byte first)
 type_conv(V, integer) when is_integer(V) -> <<V:32>>;
-type_conv(V, integer64) -> throw ({error, unsupported});
+% 64 bit value in big endian order (high byte first)
+type_conv(V, integer64) when is_integer(V) -> <<V:64>>;
 % 4 octets in network byte order
 type_conv(V = {A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
 % 16 octets in network byte order
@@ -290,6 +291,8 @@ dec_attr_val(A, I0) when A#attribute.type == integer ->
         _ ->
             [{A, I0}]
     end;
+dec_attr_val(A, Bin = <<I:64>>) when A#attribute.type == integer64 ->
+    [{A, I}];
 dec_attr_val(A, <<B,C,D,E>>) when A#attribute.type == ipaddr ->
     [{A, {B,C,D,E}}];
 dec_attr_val(A, Bin = <<I0:16,I1:16,I2:16,I3:16,I4:16,I5:16,I6:16,I7:16>>) when A#attribute.type == ipv6addr ->
