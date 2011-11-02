@@ -112,7 +112,7 @@ type_conv(V, extendedflags) -> throw ({error, unsupported});
 % 8 octets in network byte order
 type_conv(V, ifid) -> throw ({error, unsupported});
 % 32 bit value in big endian order (high byte first)
-type_conv(V, integer) -> <<V:32>>;
+type_conv(V, integer) when is_integer(V) -> <<V:32>>;
 type_conv(V, integer64) -> throw ({error, unsupported});
 % 4 octets in network byte order
 type_conv(V = {A,B,C,D}, ipaddr) -> <<A:8, B:8, C:8, D:8>>;
