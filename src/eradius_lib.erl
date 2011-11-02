@@ -131,7 +131,7 @@ type_conv(V, ipv6prefix) -> throw ({error, unsupported});
 type_conv(V, octets) when is_list(V) -> iolist_to_binary(V);
 type_conv(V, octets) when is_binary(V) -> V;
 % 16-bit unsigned integer
-type_conv(V, short) -> throw ({error, unsupported});
+type_conv(V, short) when is_integer(V), 0 =< V, V =< 65535 -> <<V:16>>;
 % 4-octet signed integer in network byte order
 type_conv(V, signed) -> throw ({error, unsupported});
 % 0-253 octets
@@ -322,6 +322,8 @@ dec_attr_val(A, Bin) when A#attribute.type == octets ->
 	_ ->
 	    [{A, Bin}]
     end;
+dec_attr_val(A, Bin = <<S:16>>) when A#attribute.type == short ->
+    [{A, S}];
 dec_attr_val(A, Val) ->
     io:format("Uups...A=~p~n",[A]),
     [{A, Val}].
