@@ -299,8 +299,6 @@ dec_attr_val(A, Bin = <<Val:32>>) when A#attribute.type == date ->
     Mega = Val div 1000000,
     Sec = Val rem 1000000,
     [{A, {Mega, Sec, 0}}];
-dec_attr_val(A, Bin) when A#attribute.type == string ->
-    [{A, binary_to_list(Bin)}];
 dec_attr_val(A, I0) when A#attribute.type == integer ->
     L = size(I0)*8,
     case I0 of
@@ -327,6 +325,8 @@ dec_attr_val(A, Bin = <<S:16>>) when A#attribute.type == short ->
     [{A, S}];
 dec_attr_val(A, Bin = <<S:32/signed>>) when A#attribute.type == signed ->
     [{A, S}];
+dec_attr_val(A, Bin) when A#attribute.type == string ->
+    [{A, binary_to_list(Bin)}];
 dec_attr_val(A, Val) ->
     io:format("Uups...A=~p~n",[A]),
     [{A, Val}].
