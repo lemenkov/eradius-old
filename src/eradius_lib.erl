@@ -98,7 +98,7 @@ enc_attrib(Id, V, Type) ->
 % Ascend's binary filter format.
 type_conv(V, abinary) -> throw ({error, unsupported});
 % 8 bit unsigned integer
-type_conv(V, byte) -> throw ({error, unsupported});
+type_conv(V, byte) ->  <<V:8>>;
 % if length 4, is the same as the "ipaddr" type. if length 16, is the same as "ipv6addr" type.
 type_conv(V, comboip) -> throw ({error, unsupported});
 % 32 bit value in big endian order - seconds since 00:00:00 GMT, Jan. 1, 1970
@@ -281,6 +281,8 @@ dec_attributes(A0, Acc) ->
 	    dec_attributes(A1, [{Type, Val} | Acc])
     end.
 
+dec_attr_val(A, Bin = <<Val:8>>) when A#attribute.type == byte ->
+    [{A, Val}];
 dec_attr_val(A, Bin) when A#attribute.type == string ->
     [{A, binary_to_list(Bin)}];
 dec_attr_val(A, I0) when A#attribute.type == integer ->
