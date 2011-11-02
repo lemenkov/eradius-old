@@ -105,8 +105,10 @@ type_conv(V = {A,B,C,D}, comboip) -> <<A:8, B:8, C:8, D:8>>;
 type_conv(V = {A,B,C,D,E,F,G,H}, comboip) ->
 	<<A:16, B:16, C:16, D:16, E:16, F:16, G:16, H:16>>;
 % 32 bit value in big endian order - seconds since 00:00:00 GMT, Jan. 1, 1970
-type_conv(V, date) when is_list(V) -> iolist_to_binary(V);
-type_conv(V, date) when is_binary(V) -> V;
+type_conv(V, date) when is_integer(V) -> <<V:32>>;
+type_conv(V = {Mega, Secs, _}, date) ->
+	TS = Mega*1000000 + Secs,
+	<<TS:32>>;
 % 6 octets of hh:hh:hh:hh:hh:hh where 'h' is hex digits, upper or lowercase.
 type_conv(V, ether) -> throw ({error, unsupported});
 type_conv(V, evs) -> throw ({error, unsupported});
@@ -292,6 +294,10 @@ dec_attr_val(A, Bin = <<I0:8,I1:8,I2:8,I3:8>>) when A#attribute.type == comboip 
     [{A, {I0,I1,I2,I3}}];
 dec_attr_val(A, Bin = <<I0:16,I1:16,I2:16,I3:16,I4:16,I5:16,I6:16,I7:16>>) when A#attribute.type == comboip ->
     [{A, {I0,I1,I2,I3,I4,I5,I6,I7}}];
+dec_attr_val(A, Bin = <<Val:32>>) when A#attribute.type == date ->
+    Mega = Val div 1000000,
+    Sec = Val rem 1000000,
+    [{A, {Mega, Sec, 0}}];
 dec_attr_val(A, Bin) when A#attribute.type == string ->
     [{A, binary_to_list(Bin)}];
 dec_attr_val(A, I0) when A#attribute.type == integer ->
