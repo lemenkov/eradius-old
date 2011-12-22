@@ -99,7 +99,7 @@ ATTRIBUTE	WiMAX-SDFID				27	short
 
 # The WMF standard version of this attribute is deprecated in WMF 1.5
 # and shall no longer be used. Replaced by (26/84) Packet Flow Descriptor v2
-# 
+#
 # Alvarion uses a vendor specific version of this attribute that combines
 # some aspects of v1 (26/28) and v2 (26/84)
 # See their Radius Interoperability Spec documentation for additional details.

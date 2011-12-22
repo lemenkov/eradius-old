@@ -7,8 +7,8 @@
 # been standardized
 #
 #
-# NOTE: All standard (IANA registered) attributes are 
-#       defined in the default dictionary of the 
+# NOTE: All standard (IANA registered) attributes are
+#       defined in the default dictionary of the
 #       radiusclient-ng library.
 #
 

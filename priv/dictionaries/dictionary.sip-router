@@ -17,9 +17,9 @@
 #
 
 #
-# NOTE: All standard (IANA registered) attributes are 
-#       commented out except those that are missing in 
-#       the default dictionary of the radiusclient-ng 
+# NOTE: All standard (IANA registered) attributes are
+#       commented out except those that are missing in
+#       the default dictionary of the radiusclient-ng
 #       library.
 #
 
