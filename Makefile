@@ -20,6 +20,7 @@ all: compile
 compile:
 	VSN=$(VSN) $(REBAR) compile $(REBAR_FLAGS)
 
+check: test
 test: all
 	@rm -rf .eunit
 	$(REBAR) eunit $(REBAR_FLAGS)
