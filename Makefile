@@ -8,12 +8,11 @@ NAME := eradius
 ERLANG_ROOT := $(shell erl -eval 'io:format("~s", [code:root_dir()])' -s init stop -noshell)
 ERLDIR=$(ERLANG_ROOT)/lib/$(NAME)-$(VSN)
 
-EBIN_DIR := ebin
 ERL_SOURCES  := $(wildcard src/*.erl)
 ERL_INCLUDES := $(wildcard include/*.hrl)
 ERL_DICTS    := $(wildcard priv/dictionary*.map)
-ERL_OBJECTS  := $(ERL_SOURCES:src/%.erl=$(EBIN_DIR)/%.beam)
-APP_FILE := $(EBIN_DIR)/$(NAME).app
+ERL_OBJECTS  := $(ERL_SOURCES:src/%.erl=ebin/%.beam)
+APP_FILE := ebin/$(NAME).app
 
 all: compile
 
@@ -26,11 +25,13 @@ test: all
 	$(REBAR) eunit $(REBAR_FLAGS)
 
 install: all
-	install -D -p -m 0644 $(APP_FILE) $(DESTDIR)$(ERLDIR)/$(APP_FILE)
-	install -p -m 0644 $(ERL_OBJECTS) $(DESTDIR)$(ERLDIR)/$(EBIN_DIR)
+	test -d $(DESTDIR)$(ERLDIR) || mkdir -p $(DESTDIR)$(ERLDIR)
+	install -d $(DESTDIR)$(ERLDIR)/ebin
 	install -d $(DESTDIR)$(ERLDIR)/include
-	install -p -m 0644 $(ERL_INCLUDES) $(DESTDIR)$(ERLDIR)/include
 	install -d $(DESTDIR)$(ERLDIR)/priv
+	install -p -m 0644 $(APP_FILE) $(DESTDIR)$(ERLDIR)/ebin
+	install -p -m 0644 $(ERL_OBJECTS) $(DESTDIR)$(ERLDIR)/ebin
+	install -p -m 0644 $(ERL_INCLUDES) $(DESTDIR)$(ERLDIR)/include
 	install -p -m 0644 $(ERL_DICTS) $(DESTDIR)$(ERLDIR)/priv
 
 clean:
