@@ -211,7 +211,7 @@ ATTRIBUTE	DHCP-Relay-Remote-Id			82.2	octets
 
 # 3 is reserved and shouldn't be used for anything
 ATTRIBUTE	DHCP-Docsis-Device-Class		82.4	integer
-ATTRIBUTE	DHCP-Relay-Link-Selection		82.5	ipaddr	
+ATTRIBUTE	DHCP-Relay-Link-Selection		82.5	ipaddr
 ATTRIBUTE	DHCP-Subscriber-Id			82.6	string
 
 # AGH!  RADIUS inside of DHCP!
